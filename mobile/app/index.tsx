@@ -1,17 +1,12 @@
-import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react';
+import { Redirect } from 'expo-router';
+import { useAuth } from '../context/AuthContext';
 
-const index = () => {
-  return (
-    <Text>Index</Text>
-  )
+export default function Index() {
+  const { isAuthenticated } = useAuth();
+  // Redirect based on auth state
+  if (isAuthenticated) {
+    return <Redirect href="/(tabs)" />;
+  }
+  return <Redirect href="/(auth)/login" />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-})
-
-export default index

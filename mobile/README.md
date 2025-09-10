@@ -1,5 +1,31 @@
 # Welcome to your Expo app 👋
+## Mobile app quick start
 
+This Expo Router app includes a basic auth flow (Login/Register) and a tabbed Dashboard. Auth uses hardcoded demo credentials for now.
+
+- Login demo user: `user@example.com`
+- Password: `password123`
+
+### Run
+
+1. Install dependencies
+2. Start Expo
+
+```
+npm install
+npm run start
+```
+
+Open the app in Expo Go (Android/iOS) or press `w` for web.
+
+### Structure
+
+- `app/_layout.tsx` – wraps the app with AuthProvider
+- `app/(auth)/*` – Login and Register screens
+- `app/(tabs)/*` – Dashboard (index) and Settings tab
+- `app/index.tsx` – redirects to `(auth)` or `(tabs)` based on auth state
+
+Replace the hardcoded auth in `context/AuthContext.tsx` with real API calls when ready.
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
 ## Get started
