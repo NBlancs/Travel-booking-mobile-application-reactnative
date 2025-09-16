@@ -1,7 +1,8 @@
 import React from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View} from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
+import { Pressable } from "react-native"
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();

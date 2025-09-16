@@ -6,6 +6,8 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
       <Text>App preferences would go here.</Text>
+      <Text> NOT AVAILABLE</Text>
+    
     </View>
   );
 }

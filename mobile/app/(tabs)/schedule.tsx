@@ -6,6 +6,8 @@ export default function ScheduleScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Schedule</Text>
       <Text>Your upcoming trips and bookings will appear here.</Text>
+        <Text> NO SCHEDULE FOR THE MEANTIME! </Text>
+    
     </View>
   );
 }
