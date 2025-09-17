@@ -9,7 +9,6 @@ const TabBarButton = React.forwardRef<any, BottomTabBarButtonProps>(({ children,
     <Pressable
       ref={ref}
       {...props}
-      // No ripple on Android
       android_ripple={undefined}
     >
       {children}
@@ -26,7 +25,6 @@ export default function TabsLayout() {
         tabBarButton: (p) => <TabBarButton {...p} />,
       }}
     >
-      {/* ...existing code... */}
       <Tabs.Screen
         name="index"
         options={{
@@ -34,6 +32,13 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
         }}
       />
+      <Tabs.Screen
+          name="booking"
+          options={{
+            title: "Booking",
+            tabBarIcon: ({ color, size }) => <Ionicons name="airplane" color={color} size={size}/>,
+        }} 
+        />
       <Tabs.Screen
         name="schedule"
         options={{
@@ -45,10 +50,9 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({ color, size }) => <Ionicons name="settings" color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings" color={color} size={size} />
         }}
       />
-      {/* ...existing code... */}
     </Tabs>
   );
 }

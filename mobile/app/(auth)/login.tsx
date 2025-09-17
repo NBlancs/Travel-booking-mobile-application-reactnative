@@ -23,8 +23,6 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground
-
-    // change this unya
       source={require("../../assets/images/skyblue.jpg")}
       style={styles.bg}
       resizeMode="cover"

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Link, router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
+import { ImageBackground } from "expo-image";
 
 export default function RegisterScreen() {
   const { signUp } = useAuth();
@@ -22,6 +23,14 @@ export default function RegisterScreen() {
   };
 
   return (
+    <ImageBackground
+      source={require("../../assets/images/skyblue.jpg")}
+      style={styles.bg}
+      resizeMode="cover"
+    > 
+
+
+
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>Create account</Text>
@@ -49,11 +58,13 @@ export default function RegisterScreen() {
         </View>
       </View>
     </KeyboardAvoidingView>
+    </ImageBackground> 
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#f7f7f7" },
+  bg: { flex: 1 },
+  container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "transparent" },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 20, gap: 12, elevation: 2 },
   title: { fontSize: 22, fontWeight: "600", marginBottom: 8 },
   input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 12 },
