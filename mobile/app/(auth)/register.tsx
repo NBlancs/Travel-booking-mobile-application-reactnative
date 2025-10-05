@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Link, router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { ImageBackground } from "expo-image";
@@ -28,10 +28,12 @@ export default function RegisterScreen() {
       style={styles.bg}
       resizeMode="cover"
     > 
-
-
-
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
+      <Image 
+        source={require("../../assets/figma/voyago_logo.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <View style={styles.card}>
         <Text style={styles.title}>Create account</Text>
         <TextInput
@@ -65,6 +67,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   bg: { flex: 1 },
   container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "transparent" },
+  logo: { width: 350, height: 120, alignSelf: "center", marginBottom: 32 },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 20, gap: 12, elevation: 2 },
   title: { fontSize: 22, fontWeight: "600", marginBottom: 8 },
   input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 12 },

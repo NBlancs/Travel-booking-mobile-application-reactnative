@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, router } from "expo-router";
-import { Alert, ImageBackground, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, ImageBackground, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 
 export default function LoginScreen() {
@@ -28,6 +28,11 @@ export default function LoginScreen() {
       resizeMode="cover"
     >
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
+        <Image 
+          source={require("../../assets/figma/voyago_logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <View style={styles.card}>
           <Text style={styles.title}>Welcome back</Text>
           <TextInput
@@ -61,6 +66,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   bg: { flex: 1, backgroundColor: "#87CEEB" },
   container: { flex: 1, justifyContent: "center", padding: 24 },
+  logo: { width: 350, height: 120, alignSelf: "center", marginBottom: 32 },
   card: { backgroundColor: "rgba(255,255,255,0.92)", borderRadius: 12, padding: 20, gap: 12, elevation: 2 },
   title: { fontSize: 22, fontWeight: "600", marginBottom: 8 },
   input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 12 },
