@@ -10,7 +10,6 @@ export default function GetStartedScreen() {
       resizeMode="cover"
     >
       <View style={styles.container}>
-        {/* Travel Polaroids Image */}
         <View style={styles.imageContainer}>
           <Image
             source={require("../../assets/images/travelpolaroids.png")}
@@ -19,14 +18,12 @@ export default function GetStartedScreen() {
           />
         </View>
 
-        {/* Content Section */}
         <View style={styles.contentContainer}>
           <Text style={styles.title}>Turn Your Travel Dreams Into Reality</Text>
           <Text style={styles.subtitle}>
             Find the perfect getaway from thousands of destinations around the world
           </Text>
 
-          {/* Get Started Button */}
           <Link href="/(auth)/login" asChild>
             <Pressable style={styles.button}>
               <Text style={styles.buttonText}>GET STARTED</Text>

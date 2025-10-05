@@ -10,7 +10,7 @@ const destinations = [
     name: "Kyoto",
     country: "Japan",
     image: require("../../assets/images/kyoto.png"),
-    price: "$2,450",
+    price: "₱12,450",
     rating: "4.9"
   },
   {
@@ -18,7 +18,7 @@ const destinations = [
     name: "Machu Picchu",
     country: "Peru",
     image: require("../../assets/images/machupichu.png"),
-    price: "$1,890",
+    price: "₱11,890",
     rating: "4.8"
   },
   {
@@ -26,7 +26,7 @@ const destinations = [
     name: "Santorini",
     country: "Greece",
     image: require("../../assets/images/santorini.png"),
-    price: "$3,200",
+    price: "₱13,200",
     rating: "4.9"
   },
   {
@@ -34,7 +34,7 @@ const destinations = [
     name: "Paris",
     country: "France",
     image: require("../../assets/images/paris.png"),
-    price: "$2,750",
+    price: "₱15,750",
     rating: "4.7"
   }
 ];
