@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 24,
+    paddingTop: 70,
     paddingBottom: 16,
   },
   title: { 

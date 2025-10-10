@@ -61,7 +61,7 @@ export default function ScheduleScreen() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Upcoming Trips</Text>
+        {/* <Text style={styles.sectionTitle}>Upcoming Trips</Text> */}
         {upcomingTrips.map(renderTripCard)}
       </View>
 
@@ -79,7 +79,8 @@ export default function ScheduleScreen() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: "#F9FAFB" 
+    backgroundColor: "#F9FAFB",
+    paddingTop: 50,
   },
   section: {
     padding: 16,

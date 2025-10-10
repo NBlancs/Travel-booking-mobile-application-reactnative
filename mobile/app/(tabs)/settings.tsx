@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#FFFFFF",
     marginBottom: 16,
+    paddingTop: 70,
   },
   avatar: {
     width: 60,
