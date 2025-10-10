@@ -122,7 +122,7 @@ export default function DashboardScreen() {
                 <View style={styles.propertyOverlay}>
                   <View style={styles.priceTag}>
                     <Text style={styles.priceText}>
-                      ${property.price}
+                      ₱{property.price}
                       <Text style={styles.priceSubtext}>/Night</Text>
                     </Text>
                   </View>
@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
+    // padding sa top
     paddingTop: 50,
     paddingBottom: 20,
   },
