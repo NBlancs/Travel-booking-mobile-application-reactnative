@@ -11,43 +11,12 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
+import { destinations, categories } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
-
-  // Property data matching the design
-  const properties = [
-    {
-      id: 1,
-      name: "Lanikai Beach",
-      location: "6 Akanthous Street, Cyprus",
-      price: 800,
-      image: require("../../assets/images/santorini.png"),
-    },
-    {
-      id: 2,
-      name: "Kyoto Temple",
-      location: "Kyoto, Japan",
-      price: 650,
-      image: require("../../assets/images/kyoto.png"),
-    },
-    {
-      id: 3,
-      name: "Paris City",
-      location: "Paris, France",
-      price: 900,
-      image: require("../../assets/images/paris.png"),
-    },
-  ];
-
-  const categories = [
-    { id: 1, name: "Beach", icon: "🏖️" },
-    { id: 2, name: "Islands", icon: "🏝️" },
-    { id: 3, name: "Forest", icon: "🌲" },
-    { id: 4, name: "Cabins", icon: "🏡" },
-  ];
 
   return (
     <View style={styles.container}>
@@ -112,17 +81,17 @@ export default function DashboardScreen() {
             showsHorizontalScrollIndicator={false}
             style={styles.propertiesScroll}
           >
-            {properties.map((property) => (
-              <Pressable key={property.id} style={styles.propertyCard}>
+            {destinations.map((destination) => (
+              <Pressable key={destination.id} style={styles.propertyCard}>
                 <Image 
-                  source={property.image} 
+                  source={destination.image} 
                   style={styles.propertyImage}
                   resizeMode="cover"
                 />
                 <View style={styles.propertyOverlay}>
                   <View style={styles.priceTag}>
                     <Text style={styles.priceText}>
-                      ₱{property.price}
+                      {destination.priceFormatted}
                       <Text style={styles.priceSubtext}>/Night</Text>
                     </Text>
                   </View>
@@ -131,10 +100,10 @@ export default function DashboardScreen() {
                   </Pressable>
                 </View>
                 <View style={styles.propertyInfo}>
-                  <Text style={styles.propertyName}>{property.name}</Text>
+                  <Text style={styles.propertyName}>{destination.name}</Text>
                   <View style={styles.locationInfo}>
                     <Text style={styles.locationPin}>📍</Text>
-                    <Text style={styles.propertyLocation}>{property.location}</Text>
+                    <Text style={styles.propertyLocation}>{destination.location}</Text>
                   </View>
                 </View>
               </Pressable>

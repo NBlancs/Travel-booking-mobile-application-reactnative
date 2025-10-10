@@ -1,53 +1,19 @@
 import React from "react";
 import { StyleSheet, Text, View, ScrollView, Image, Pressable, Dimensions } from "react-native";
+import { destinations, Destination } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2; // 2 cards per row with padding
 
-const destinations = [
-  {
-    id: 1,
-    name: "Kyoto",
-    country: "Japan",
-    image: require("../../assets/images/kyoto.png"),
-    price: "₱12,450",
-    rating: "4.9"
-  },
-  {
-    id: 2,
-    name: "Machu Picchu",
-    country: "Peru",
-    image: require("../../assets/images/machupichu.png"),
-    price: "₱11,890",
-    rating: "4.8"
-  },
-  {
-    id: 3,
-    name: "Santorini",
-    country: "Greece",
-    image: require("../../assets/images/santorini.png"),
-    price: "₱13,200",
-    rating: "4.9"
-  },
-  {
-    id: 4,
-    name: "Paris",
-    country: "France",
-    image: require("../../assets/images/paris.png"),
-    price: "₱15,750",
-    rating: "4.7"
-  }
-];
-
 export default function BookingScreen() {
-  const renderDestinationCard = (destination: typeof destinations[0]) => (
+  const renderDestinationCard = (destination: Destination) => (
     <Pressable key={destination.id} style={styles.card}>
       <Image source={destination.image} style={styles.cardImage} resizeMode="cover" />
       <View style={styles.cardContent}>
         <Text style={styles.destinationName}>{destination.name}</Text>
         <Text style={styles.countryName}>{destination.country}</Text>
         <View style={styles.cardFooter}>
-          <Text style={styles.price}>{destination.price}</Text>
+          <Text style={styles.price}>{destination.priceFormatted}</Text>
           <View style={styles.ratingContainer}>
             <Text style={styles.rating}>⭐ {destination.rating}</Text>
           </View>
