@@ -65,7 +65,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱12,100",
     rating: "4.8",
     category: "City",
-    image: require("../assets/images/santorini.png"), // TODO: Add osaka image
+    image: require("../assets/images/osaka.jpg"),
   },
   {
     id: 6,
@@ -76,7 +76,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱9,300",
     rating: "4.7",
     category: "City",
-    image: require("../assets/images/kyoto.png"), // TODO: Add kuala-lumpur image
+    image: require("../assets/images/kuala_lumpur.jpg"),
   },
   {
     id: 7,
@@ -87,7 +87,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱10,900",
     rating: "4.7",
     category: "City",
-    image: require("../assets/images/paris.png"), // TODO: Add buenos-aires image
+    image: require("../assets/images/buenos_aires.webp"), 
   },
   {
     id: 8,
@@ -98,7 +98,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱17,000",
     rating: "4.8",
     category: "City",
-    image: require("../assets/images/machupichu.png"), // TODO: Add new-york image
+    image: require("../assets/images/newyork_city.webp"),
   },
   {
     id: 9,
@@ -109,7 +109,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱14,500",
     rating: "4.7",
     category: "Historical",
-    image: require("../assets/images/santorini.png"), // TODO: Add rome image
+    image: require("../assets/images/rome.avif"),
   },
   {
     id: 10,
@@ -120,7 +120,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱15,200",
     rating: "4.8",
     category: "City",
-    image: require("../assets/images/kyoto.png"), // TODO: Add london image
+    image: require("../assets/images/london.webp"),
   },
   {
     id: 11,
@@ -131,7 +131,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱8,900",
     rating: "4.8",
     category: "Island",
-    image: require("../assets/images/paris.png"), // TODO: Add bali image
+    image: require("../assets/images/bali.jpg"),
   },
   {
     id: 12,
@@ -142,7 +142,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱14,500",
     rating: "4.7",
     category: "City",
-    image: require("../assets/images/machupichu.png"), // TODO: Add sydney image
+    image: require("../assets/images/sydney_operahouse.webp"), 
   },
   {
     id: 13,
@@ -153,7 +153,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱16,200",
     rating: "4.7",
     category: "City",
-    image: require("../assets/images/santorini.png"), // TODO: Add dubai image
+    image: require("../assets/images/Dubai.jpg"),
   },
   {
     id: 14,
@@ -164,7 +164,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱11,100",
     rating: "4.8",
     category: "Cultural",
-    image: require("../assets/images/kyoto.png"), // TODO: Add istanbul image
+    image: require("../assets/images/Istanbul.webp"), 
   },
   {
     id: 15,
@@ -175,7 +175,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱14,750",
     rating: "4.7",
     category: "City",
-    image: require("../assets/images/paris.png"), // TODO: Add barcelona image
+    image: require("../assets/images/barcelona.webp"),
   },
   {
     id: 16,
@@ -186,7 +186,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱12,900",
     rating: "4.8",
     category: "Historical",
-    image: require("../assets/images/machupichu.png"), // TODO: Add prague image
+    image: require("../assets/images/prague.jpg"),
   },
   {
     id: 17,
@@ -197,7 +197,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱8,100",
     rating: "4.7",
     category: "Beach",
-    image: require("../assets/images/santorini.png"), // TODO: Add kribi image
+    image: require("../assets/images/kribi.webp"), 
   },
   {
     id: 18,
@@ -208,7 +208,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱15,500",
     rating: "4.9",
     category: "Island",
-    image: require("../assets/images/kyoto.png"), // TODO: Add fiji image
+    image: require("../assets/images/fiji.jpg"),
   },
   {
     id: 19,
@@ -219,7 +219,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱13,500",
     rating: "4.8",
     category: "Historical",
-    image: require("../assets/images/paris.png"), // TODO: Add petra image
+    image: require("../assets/images/petra.webp"),
   },
   {
     id: 20,
@@ -230,7 +230,7 @@ export const destinations: Destination[] = [
     priceFormatted: "₱14,200",
     rating: "4.9",
     category: "Historical",
-    image: require("../assets/images/machupichu.png"), // TODO: Add great-wall image
+    image: require("../assets/images/greatwall_china.png"),
   },
 ];
 
