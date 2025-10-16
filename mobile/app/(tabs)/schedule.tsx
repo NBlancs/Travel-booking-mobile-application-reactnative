@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, ScrollView, Image, Pressable } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable } from "react-native";
 
 const upcomingTrips = [
   {
@@ -59,20 +59,29 @@ export default function ScheduleScreen() {
   );
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.section}>
-        {/* <Text style={styles.sectionTitle}>Upcoming Trips</Text> */}
-        {upcomingTrips.map(renderTripCard)}
-      </View>
+    <View style={styles.container}>
+      <ImageBackground
+        source={require("../../assets/images/skyblue.jpg")}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.25 }}
+      >
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <View style={styles.section}>
+            {/* <Text style={styles.sectionTitle}>Upcoming Trips</Text> */}
+            {upcomingTrips.map(renderTripCard)}
+          </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today's Schedule</Text>
-        <View style={styles.scheduleCard}>
-          <Text style={styles.scheduleDate}>March 15, 2025</Text>
-          {todaySchedule.map(renderScheduleItem)}
-        </View>
-      </View>
-    </ScrollView>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Today's Schedule</Text>
+            <View style={styles.scheduleCard}>
+              <Text style={styles.scheduleDate}>March 15, 2025</Text>
+              {todaySchedule.map(renderScheduleItem)}
+            </View>
+          </View>
+        </ScrollView>
+      </ImageBackground>
+    </View>
   );
 }
 
@@ -80,6 +89,14 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: "#F9FAFB",
+  },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  scrollView: {
+    flex: 1,
     paddingTop: 50,
   },
   section: {
@@ -155,6 +172,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 16,
+    paddingBottom: 42,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },

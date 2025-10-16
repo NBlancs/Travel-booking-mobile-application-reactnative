@@ -7,6 +7,7 @@ import {
   TextInput, 
   Pressable,
   Image,
+  ImageBackground,
   Dimensions
 } from "react-native";
 import { router } from "expo-router";
@@ -20,10 +21,16 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
+      <ImageBackground
+        source={require("../../assets/images/skyblue.jpg")}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.25 }}
       >
+        <ScrollView 
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.locationContainer}>
@@ -114,6 +121,7 @@ export default function DashboardScreen() {
         {/* Bottom spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
+      </ImageBackground>
     </View>
   );
 }
@@ -122,6 +130,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
   scrollView: {
     flex: 1,

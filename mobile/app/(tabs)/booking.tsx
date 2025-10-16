@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, ScrollView, Image, Pressable, Dimensions } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable, Dimensions } from "react-native";
 import { destinations, Destination } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
@@ -23,16 +23,25 @@ export default function BookingScreen() {
   );
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Book Your Next Adventure</Text>
-        <Text style={styles.subtitle}>Discover amazing destinations around the world</Text>
-      </View>
+    <View style={styles.container}>
+      <ImageBackground
+        source={require("../../assets/images/skyblue.jpg")}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.25 }}
+      >
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Book Your Next Adventure</Text>
+            <Text style={styles.subtitle}>Discover amazing destinations around the world</Text>
+          </View>
 
-      <View style={styles.grid}>
-        {destinations.map(renderDestinationCard)}
-      </View>
-    </ScrollView>
+          <View style={styles.grid}>
+            {destinations.map(renderDestinationCard)}
+          </View>
+        </ScrollView>
+      </ImageBackground>
+    </View>
   );
 }
 
@@ -40,6 +49,14 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: "#F9FAFB" 
+  },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  scrollView: {
+    flex: 1,
   },
   header: {
     padding: 24,
