@@ -10,6 +10,7 @@ import {
   ImageBackground,
   Dimensions
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { destinations, categories } from "../../data/destinations";
@@ -35,24 +36,24 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <View style={styles.locationContainer}>
             <Pressable style={styles.locationButton}>
-              <Text style={styles.locationIcon}>📍</Text>
+              <Ionicons name="location-outline" size={24} color="#333" />
             </Pressable>
             <View>
               <Text style={styles.locationLabel}>Location</Text>
               <View style={styles.locationRow}>
                 <Text style={styles.locationText}>Bali, Indonesia</Text>
-                <Text style={styles.dropdownIcon}>▼</Text>
+                <Ionicons name="chevron-down" size={12} color="#666" />
               </View>
             </View>
           </View>
           <Pressable style={styles.notificationButton}>
-            <Text style={styles.notificationIcon}>🔔</Text>
+            <Ionicons name="notifications-outline" size={24} color="#333" />
           </Pressable>
         </View>
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search your place"
@@ -66,7 +67,7 @@ export default function DashboardScreen() {
           <View style={styles.categoriesContainer}>
             {categories.map((category) => (
               <Pressable key={category.id} style={styles.categoryCard}>
-                <Text style={styles.categoryIcon}>{category.icon}</Text>
+                <Ionicons name={category.icon as any} size={32} color="#333" style={styles.categoryIcon} />
                 <Text style={styles.categoryName}>{category.name}</Text>
               </Pressable>
             ))}
@@ -103,13 +104,13 @@ export default function DashboardScreen() {
                     </Text>
                   </View>
                   <Pressable style={styles.favoriteButton}>
-                    <Text style={styles.favoriteIcon}>🤍</Text>
+                    <Ionicons name="heart-outline" size={20} color="#333" />
                   </Pressable>
                 </View>
                 <View style={styles.propertyInfo}>
                   <Text style={styles.propertyName}>{destination.name}</Text>
                   <View style={styles.locationInfo}>
-                    <Text style={styles.locationPin}>📍</Text>
+                    <Ionicons name="location-outline" size={14} color="#666" />
                     <Text style={styles.propertyLocation}>{destination.location}</Text>
                   </View>
                 </View>
@@ -166,9 +167,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  locationIcon: {
-    fontSize: 24,
-  },
   locationLabel: {
     fontSize: 14,
     color: "#333",
@@ -184,10 +182,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000",
   },
-  dropdownIcon: {
-    fontSize: 10,
-    color: "#666",
-  },
   notificationButton: {
     width: 56,
     height: 56,
@@ -200,9 +194,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-  },
-  notificationIcon: {
-    fontSize: 24,
   },
   searchContainer: {
     flexDirection: "row",
@@ -220,7 +211,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   searchIcon: {
-    fontSize: 20,
     marginRight: 12,
   },
   searchInput: {
@@ -271,7 +261,6 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   categoryIcon: {
-    fontSize: 32,
     marginBottom: 8,
   },
   categoryName: {
@@ -339,9 +328,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  favoriteIcon: {
-    fontSize: 20,
-  },
   propertyInfo: {
     padding: 16,
     paddingBottom: 20,
@@ -359,9 +345,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-  },
-  locationPin: {
-    fontSize: 14,
   },
   propertyLocation: {
     fontSize: 14,
