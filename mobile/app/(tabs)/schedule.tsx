@@ -79,6 +79,9 @@ export default function ScheduleScreen() {
               {todaySchedule.map(renderScheduleItem)}
             </View>
           </View>
+
+          {/* Bottom spacing for tab bar */}
+          <View style={styles.bottomSpacing} />
         </ScrollView>
       </ImageBackground>
     </View>
@@ -210,5 +213,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6B7280",
     textTransform: "capitalize",
+  },
+  bottomSpacing: {
+    height: 100,
   },
 });

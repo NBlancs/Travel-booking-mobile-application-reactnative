@@ -28,7 +28,7 @@ export default function TabsLayout() {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
-          bottom:10,
+          bottom:8,
           left: 50,
           right: 50,
           elevation: 8,

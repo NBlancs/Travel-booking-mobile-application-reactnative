@@ -99,6 +99,9 @@ export default function SettingsScreen() {
       <View style={styles.footer}>
         <Text style={styles.versionText}>Travel Booking App v1.0.0</Text>
       </View>
+
+      {/* Bottom spacing for tab bar */}
+      <View style={styles.bottomSpacing} />
     </ScrollView>
   );
 }
@@ -214,5 +217,8 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 14,
     color: "#9CA3AF",
+  },
+  bottomSpacing: {
+    height: 100,
   },
 });

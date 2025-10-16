@@ -39,6 +39,9 @@ export default function BookingScreen() {
           <View style={styles.grid}>
             {destinations.map(renderDestinationCard)}
           </View>
+
+          {/* Bottom spacing for tab bar */}
+          <View style={styles.bottomSpacing} />
         </ScrollView>
       </ImageBackground>
     </View>
@@ -126,5 +129,8 @@ const styles = StyleSheet.create({
   rating: {
     fontSize: 14,
     color: "#6B7280",
+  },
+  bottomSpacing: {
+    height: 100,
   },
 });

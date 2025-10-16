@@ -67,7 +67,7 @@ export default function DashboardScreen() {
           <View style={styles.categoriesContainer}>
             {categories.map((category) => (
               <Pressable key={category.id} style={styles.categoryCard}>
-                <Ionicons name={category.icon as any} size={32} color="#333" style={styles.categoryIcon} />
+                <Text style={styles.categoryIcon}>{category.icon}</Text>
                 <Text style={styles.categoryName}>{category.name}</Text>
               </Pressable>
             ))}
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#000",
     paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   seeAllText: {
     fontSize: 14,
@@ -244,6 +244,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 20,
     gap: 12,
+    paddingTop: 5,
   },
   categoryCard: {
     flex: 1,
@@ -261,6 +262,7 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   categoryIcon: {
+    fontSize: 32,
     marginBottom: 8,
   },
   categoryName: {
@@ -282,7 +284,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
-    elevation: 5,
+    elevation: 2,
   },
   propertyImage: {
     width: "100%",
