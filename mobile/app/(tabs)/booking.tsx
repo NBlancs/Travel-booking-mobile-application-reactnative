@@ -1,12 +1,14 @@
-import React from "react";
-import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable, Dimensions } from "react-native";
+import React, { useRef } from "react";
+import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable, Dimensions, TextInput, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { destinations, Destination } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 32); // /2 if you want two cards per row with padding
+const HEADER_HEIGHT = 95; // Height of the header section
 
 export default function BookingScreen() {
+  const scrollY = useRef(new Animated.Value(0)).current;
   const renderDestinationCard = (destination: Destination) => (
     <Pressable key={destination.id} style={styles.card}>
       <ImageBackground
@@ -45,6 +47,12 @@ export default function BookingScreen() {
     </Pressable>
   );
 
+  const searchBarTranslateY = scrollY.interpolate({
+    inputRange: [0, HEADER_HEIGHT],
+    outputRange: [HEADER_HEIGHT + 0, 0],
+    extrapolate: 'clamp',
+  });
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -53,11 +61,39 @@ export default function BookingScreen() {
         resizeMode="cover"
         imageStyle={{ opacity: 0.25 }}
       >
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Sticky Search Bar */}
+        <Animated.View 
+          style={[
+            styles.stickySearchBar,
+            { transform: [{ translateY: searchBarTranslateY }] }
+          ]}
+        >
+          <View style={styles.searchContainer}>
+            <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search your place"
+              placeholderTextColor="#999"
+            />
+          </View>
+        </Animated.View>
+
+        <Animated.ScrollView 
+          style={styles.scrollView} 
+          showsVerticalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
+          scrollEventThrottle={16}
+        >
           <View style={styles.header}>
             <Text style={styles.title}>Book Your Next Adventure</Text>
             <Text style={styles.subtitle}>Discover amazing destinations around the world</Text>
           </View>
+
+          {/* Spacer for search bar */}
+          <View style={styles.searchSpacer} />
 
           <View style={styles.grid}>
             {destinations.map(renderDestinationCard)}
@@ -65,7 +101,7 @@ export default function BookingScreen() {
 
           {/* Bottom spacing for tab bar */}
           <View style={styles.bottomSpacing} />
-        </ScrollView>
+        </Animated.ScrollView>
       </ImageBackground>
     </View>
   );
@@ -99,6 +135,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6B7280",
     lineHeight: 20,
+  },
+  stickySearchBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    paddingTop: 50,
+    paddingHorizontal: 24,
+    paddingBottom: 10,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+  },
+  searchSpacer: {
+    height: 80,
   },
   grid: {
     flexDirection: "row",
