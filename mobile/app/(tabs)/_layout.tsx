@@ -36,15 +36,15 @@ export default function TabsLayout() {
           borderRadius: 30,
           height: 70,
           paddingBottom: 0,
-          paddingTop: 12,
+          paddingTop: 16,
           paddingHorizontal: 20,
           borderTopWidth: 0,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.15,
           shadowRadius: 12,
-          marginRight: 16,
-          marginLeft: 16
+          marginRight: 48,
+          marginLeft: 48
         },
         tabBarItemStyle: {
           height: 65,
