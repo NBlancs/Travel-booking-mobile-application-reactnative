@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable, Dimensions, TextInput, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { destinations, Destination } from "../../data/destinations";
@@ -9,6 +9,19 @@ const HEADER_HEIGHT = 95; // Height of the header section
 
 export default function BookingScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+
+  const toggleFavorite = (id: number) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(id)) {
+        newFavorites.delete(id);
+      } else {
+        newFavorites.add(id);
+      }
+      return newFavorites;
+    });
+  };
   const renderDestinationCard = (destination: Destination) => (
     <Pressable key={destination.id} style={styles.card}>
       <ImageBackground
@@ -22,8 +35,15 @@ export default function BookingScreen() {
           <View style={styles.priceTag}>
             <Text style={styles.priceText}>{destination.priceFormatted}</Text>
           </View>
-          <Pressable style={styles.favoriteButton}>
-            <Ionicons name="heart-outline" size={16} color="#FFF" />
+          <Pressable 
+            style={styles.favoriteButton}
+            onPress={() => toggleFavorite(destination.id)}
+          >
+            <Ionicons 
+              name={favorites.has(destination.id) ? "heart" : "heart-outline"} 
+              size={16} 
+              color={favorites.has(destination.id) ? "#FF385C" : "#FFF"} 
+            />
           </Pressable>
         </View>
 

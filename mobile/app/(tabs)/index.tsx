@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { 
   StyleSheet, 
   Text, 
@@ -19,6 +19,19 @@ const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+
+  const toggleFavorite = (id: number) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(id)) {
+        newFavorites.delete(id);
+      } else {
+        newFavorites.add(id);
+      }
+      return newFavorites;
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -105,8 +118,15 @@ export default function DashboardScreen() {
                         <Text style={styles.priceSubtext}> /Night</Text>
                       </Text>
                     </View>
-                    <Pressable style={styles.favoriteButton}>
-                      <Ionicons name="heart-outline" size={18} color="#FFF" />
+                    <Pressable 
+                      style={styles.favoriteButton}
+                      onPress={() => toggleFavorite(destination.id)}
+                    >
+                      <Ionicons 
+                        name={favorites.has(destination.id) ? "heart" : "heart-outline"} 
+                        size={18} 
+                        color={favorites.has(destination.id) ? "#FF385C" : "#FFF"} 
+                      />
                     </Pressable>
                   </View>
 
