@@ -150,7 +150,11 @@ export default function DashboardScreen() {
             style={styles.propertiesScroll}
           >
             {destinations.map((destination) => (
-              <Pressable key={destination.id} style={styles.propertyCard}>
+              <Pressable 
+                key={destination.id} 
+                style={styles.propertyCard}
+                onPress={() => router.push(`/property-details?id=${destination.id}`)}
+              >
                 <ImageBackground
                   source={destination.image}
                   style={styles.propertyImage}

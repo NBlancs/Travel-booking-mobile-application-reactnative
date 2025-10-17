@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable, Dimensions, TextInput, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { destinations, Destination } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
@@ -69,7 +70,11 @@ export default function BookingScreen() {
     }
   };
   const renderDestinationCard = (destination: Destination) => (
-    <Pressable key={destination.id} style={styles.card}>
+    <Pressable 
+      key={destination.id} 
+      style={styles.card}
+      onPress={() => router.push(`/property-details?id=${destination.id}`)}
+    >
       <ImageBackground
         source={destination.image}
         style={styles.cardImage}
