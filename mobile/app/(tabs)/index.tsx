@@ -123,7 +123,7 @@ export default function DashboardScreen() {
 
         {/* Popular Place Category */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Popular Place Category</Text>
+          <Text style={styles.sectionTitle}>    Popular Place Category</Text>
           <View style={styles.categoriesContainer}>
             {categories.map((category) => (
               <Pressable key={category.id} style={styles.categoryCard}>
