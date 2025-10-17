@@ -10,8 +10,14 @@ const HEADER_HEIGHT = 95; // Height of the header section
 export default function BookingScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
+  const heartScale = useRef(new Animated.Value(0)).current;
+  const heartOpacity = useRef(new Animated.Value(1)).current;
+  const heartTranslateY = useRef(new Animated.Value(0)).current;
 
   const toggleFavorite = (id: number) => {
+    const isCurrentlyFavorited = favorites.has(id);
+    
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(id)) {
@@ -21,6 +27,46 @@ export default function BookingScreen() {
       }
       return newFavorites;
     });
+
+    // Show animation only when favoriting (not unfavoriting)
+    if (!isCurrentlyFavorited) {
+      setShowHeartAnimation(id);
+      
+      // Reset animation values
+      heartScale.setValue(0);
+      heartOpacity.setValue(1);
+      heartTranslateY.setValue(0);
+
+      // Run animations
+      Animated.parallel([
+        Animated.sequence([
+          Animated.spring(heartScale, {
+            toValue: 1,
+            friction: 3,
+            tension: 40,
+            useNativeDriver: true,
+          }),
+          Animated.timing(heartScale, {
+            toValue: 0.8,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.timing(heartOpacity, {
+          toValue: 0,
+          duration: 800,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(heartTranslateY, {
+          toValue: -80,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowHeartAnimation(null);
+      });
+    }
   };
   const renderDestinationCard = (destination: Destination) => (
     <Pressable key={destination.id} style={styles.card}>
@@ -44,6 +90,23 @@ export default function BookingScreen() {
               size={16} 
               color={favorites.has(destination.id) ? "#FF385C" : "#FFF"} 
             />
+            {/* Floating Heart Animation */}
+            {showHeartAnimation === destination.id && (
+              <Animated.View
+                style={[
+                  styles.floatingHeart,
+                  {
+                    transform: [
+                      { scale: heartScale },
+                      { translateY: heartTranslateY }
+                    ],
+                    opacity: heartOpacity,
+                  },
+                ]}
+              >
+                <Ionicons name="heart" size={40} color="#FF385C" />
+              </Animated.View>
+            )}
           </Pressable>
         </View>
 
@@ -238,6 +301,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backdropFilter: "blur(10px)",
+    overflow: "visible",
+  },
+  floatingHeart: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    pointerEvents: "none",
   },
   bottomOverlay: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { 
   StyleSheet, 
   Text, 
@@ -8,7 +8,8 @@ import {
   Pressable,
   Image,
   ImageBackground,
-  Dimensions
+  Dimensions,
+  Animated
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -20,8 +21,14 @@ const { width } = Dimensions.get('window');
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
+  const heartScale = useRef(new Animated.Value(0)).current;
+  const heartOpacity = useRef(new Animated.Value(1)).current;
+  const heartTranslateY = useRef(new Animated.Value(0)).current;
 
   const toggleFavorite = (id: number) => {
+    const isCurrentlyFavorited = favorites.has(id);
+    
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(id)) {
@@ -31,6 +38,46 @@ export default function DashboardScreen() {
       }
       return newFavorites;
     });
+
+    // Show animation only when favoriting (not unfavoriting)
+    if (!isCurrentlyFavorited) {
+      setShowHeartAnimation(id);
+      
+      // Reset animation values
+      heartScale.setValue(0);
+      heartOpacity.setValue(1);
+      heartTranslateY.setValue(0);
+
+      // Run animations
+      Animated.parallel([
+        Animated.sequence([
+          Animated.spring(heartScale, {
+            toValue: 1,
+            friction: 3,
+            tension: 40,
+            useNativeDriver: true,
+          }),
+          Animated.timing(heartScale, {
+            toValue: 0.8,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.timing(heartOpacity, {
+          toValue: 0,
+          duration: 800,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(heartTranslateY, {
+          toValue: -80,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowHeartAnimation(null);
+      });
+    }
   };
 
   return (
@@ -127,6 +174,23 @@ export default function DashboardScreen() {
                         size={18} 
                         color={favorites.has(destination.id) ? "#FF385C" : "#FFF"} 
                       />
+                      {/* Floating Heart Animation */}
+                      {showHeartAnimation === destination.id && (
+                        <Animated.View
+                          style={[
+                            styles.floatingHeart,
+                            {
+                              transform: [
+                                { scale: heartScale },
+                                { translateY: heartTranslateY }
+                              ],
+                              opacity: heartOpacity,
+                            },
+                          ]}
+                        >
+                          <Ionicons name="heart" size={50} color="#FF385C" />
+                        </Animated.View>
+                      )}
                     </Pressable>
                   </View>
 
@@ -248,7 +312,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 22,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -351,6 +415,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backdropFilter: "blur(10px)",
+    overflow: "visible",
+  },
+  floatingHeart: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    pointerEvents: "none",
   },
   bottomOverlay: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",

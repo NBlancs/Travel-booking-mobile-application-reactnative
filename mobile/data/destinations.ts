@@ -244,5 +244,6 @@ export const categories: Category[] = [
   { id: 1, name: "Beach", icon: "🏖️" },
   { id: 2, name: "Islands", icon: "🏝️" },
   { id: 3, name: "Forest", icon: "🌲" },
-  { id: 4, name: "Cabins", icon: "🏡" },
+  { id: 4, name: "More", icon: "➕" },
+  // { id: 4, name: "Cabins", icon: "🏡" },
 ];
