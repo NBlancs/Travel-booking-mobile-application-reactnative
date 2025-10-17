@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Link, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
 import { ImageBackground } from "expo-image";
 
@@ -9,6 +10,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async () => {
     try {
@@ -44,13 +46,25 @@ export default function RegisterScreen() {
           keyboardType="email-address"
           style={styles.input}
         />
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureTextEntry
-          style={styles.input}
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            secureTextEntry={!showPassword}
+            style={styles.passwordInput}
+          />
+          <Pressable 
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons 
+              name={showPassword ? "eye-off-outline" : "eye-outline"} 
+              size={22} 
+              color="#666" 
+            />
+          </Pressable>
+        </View>
         <Pressable style={[styles.button, loading && { opacity: 0.6 }]} disabled={loading} onPress={onSubmit}>
           <Text style={styles.buttonText}>{loading ? "Creating..." : "Register"}</Text>
         </Pressable>
@@ -71,6 +85,21 @@ const styles = StyleSheet.create({
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 20, gap: 12, elevation: 2 },
   title: { fontSize: 22, fontWeight: "600", marginBottom: 8 },
   input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 12 },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    paddingRight: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 12,
+  },
+  eyeIcon: {
+    padding: 4,
+  },
   button: { backgroundColor: "#16A34A", padding: 14, borderRadius: 8, alignItems: "center", marginTop: 4 },
   buttonText: { color: "#fff", fontWeight: "600" },
   footerRow: { flexDirection: "row", justifyContent: "center", marginTop: 8 },
