@@ -91,29 +91,38 @@ export default function DashboardScreen() {
           >
             {destinations.map((destination) => (
               <Pressable key={destination.id} style={styles.propertyCard}>
-                <Image 
-                  source={destination.image} 
+                <ImageBackground
+                  source={destination.image}
                   style={styles.propertyImage}
+                  imageStyle={{ borderRadius: 20 }}
                   resizeMode="cover"
-                />
-                <View style={styles.propertyOverlay}>
-                  <View style={styles.priceTag}>
-                    <Text style={styles.priceText}>
-                      {destination.priceFormatted}
-                      <Text style={styles.priceSubtext}>/Night</Text>
+                >
+                  {/* Top overlay - Price and Favorite */}
+                  <View style={styles.topOverlay}>
+                    <View style={styles.priceTag}>
+                      <Text style={styles.priceText}>
+                        {destination.priceFormatted}
+                        <Text style={styles.priceSubtext}> /Night</Text>
+                      </Text>
+                    </View>
+                    <Pressable style={styles.favoriteButton}>
+                      <Ionicons name="heart-outline" size={18} color="#FFF" />
+                    </Pressable>
+                  </View>
+
+                  {/* Bottom overlay - Property info */}
+                  <View style={styles.bottomOverlay}>
+                    <Text style={styles.propertyName} numberOfLines={1}>
+                      {destination.name}
                     </Text>
+                    <View style={styles.locationInfo}>
+                      <Ionicons name="location-outline" size={12} color="#FFF" />
+                      <Text style={styles.propertyLocation} numberOfLines={1}>
+                        {destination.location + ", "+ destination.country}
+                      </Text>
+                    </View>
                   </View>
-                  <Pressable style={styles.favoriteButton}>
-                    <Ionicons name="heart-outline" size={20} color="#333" />
-                  </Pressable>
-                </View>
-                <View style={styles.propertyInfo}>
-                  <Text style={styles.propertyName}>{destination.name}</Text>
-                  <View style={styles.locationInfo}>
-                    <Ionicons name="location-outline" size={14} color="#666" />
-                    <Text style={styles.propertyLocation}>{destination.location}</Text>
-                  </View>
-                </View>
+                </ImageBackground>
               </Pressable>
             ))}
           </ScrollView>
@@ -276,71 +285,63 @@ const styles = StyleSheet.create({
   },
   propertyCard: {
     width: width * 0.85,
-    backgroundColor: "#FFF",
-    borderRadius: 24,
+    height: 360,
     marginRight: 16,
-    marginBottom: 8,
+    borderRadius: 20,
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 2,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
   },
   propertyImage: {
     width: "100%",
-    height: 280,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: "hidden",
+    height: "100%",
+    justifyContent: "space-between",
   },
-  propertyOverlay: {
-    position: "absolute",
-    top: 16,
-    left: 16,
-    right: 16,
+  topOverlay: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+    padding: 16,
   },
   priceTag: {
-    backgroundColor: "rgba(52, 73, 94, 0.9)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 24,
+    backgroundColor: "rgba(45, 55, 72, 0.85)",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backdropFilter: "blur(10px)",
   },
   priceText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: "#FFF",
   },
   priceSubtext: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "400",
+    color: "#E5E7EB",
   },
   favoriteButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(45, 55, 72, 0.7)",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    backdropFilter: "blur(10px)",
   },
-  propertyInfo: {
+  bottomOverlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     padding: 16,
-    paddingBottom: 20,
-    backgroundColor: "#FFF",
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingTop: 20,
+    backdropFilter: "blur(10px)",
   },
   propertyName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
-    color: "#000",
+    color: "#FFF",
     marginBottom: 6,
   },
   locationInfo: {
@@ -349,10 +350,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   propertyLocation: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: 13,
+    color: "#FFF",
     fontWeight: "400",
     flex: 1,
+    opacity: 0.95,
   },
   bottomSpacing: {
     height: 10,
