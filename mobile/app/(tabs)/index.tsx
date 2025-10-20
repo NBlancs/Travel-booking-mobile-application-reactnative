@@ -9,12 +9,13 @@ import {
   Image,
   ImageBackground,
   Dimensions,
-  Animated
+  Animated,
+  Modal
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
-import { destinations, categories } from "../../data/destinations";
+import { destinations, categories, extendedCategories } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
 
@@ -22,6 +23,7 @@ export default function DashboardScreen() {
   const { user, signOut } = useAuth();
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(1)).current;
   const heartTranslateY = useRef(new Animated.Value(0)).current;
@@ -126,7 +128,22 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>    Popular Place Category</Text>
           <View style={styles.categoriesContainer}>
             {categories.map((category) => (
-              <Pressable key={category.id} style={styles.categoryCard}>
+              <Pressable 
+                key={category.id} 
+                style={({ pressed }) => [
+                  styles.categoryCard,
+                  pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] }
+                ]}
+                onPress={() => {
+                  if (category.name === "More") {
+                    setIsModalVisible(true);
+                  } else {
+                    // Handle other category clicks
+                    console.log(`${category.name} category clicked`);
+                    // You can add navigation or filtering logic here
+                  }
+                }}
+              >
                 <Text style={styles.categoryIcon}>{category.icon}</Text>
                 <Text style={styles.categoryName}>{category.name}</Text>
               </Pressable>
@@ -220,6 +237,61 @@ export default function DashboardScreen() {
         <View style={styles.bottomSpacing} />
       </ScrollView>
       </ImageBackground>
+
+      {/* Categories Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <Pressable 
+          style={styles.modalOverlay}
+          onPress={() => setIsModalVisible(false)}
+        >
+          <Pressable 
+            style={styles.modalContent}
+            onPress={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>All Categories</Text>
+              <Pressable 
+                style={styles.closeButton}
+                onPress={() => setIsModalVisible(false)}
+              >
+                <Ionicons name="close" size={28} color="#333" />
+              </Pressable>
+            </View>
+
+            {/* Modal Categories Grid */}
+            <ScrollView 
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.modalScrollContent}
+            >
+              <View style={styles.modalCategoriesGrid}>
+                {extendedCategories.map((category) => (
+                  <Pressable 
+                    key={category.id} 
+                    style={({ pressed }) => [
+                      styles.modalCategoryCard,
+                      pressed && { backgroundColor: "#F3F4F6", transform: [{ scale: 0.98 }] }
+                    ]}
+                    onPress={() => {
+                      setIsModalVisible(false);
+                      console.log(`${category.name} category selected`);
+                      // Add your category filter/navigation logic here
+                    }}
+                  >
+                    <Text style={styles.modalCategoryIcon}>{category.icon}</Text>
+                    <Text style={styles.modalCategoryName}>{category.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -373,7 +445,7 @@ const styles = StyleSheet.create({
   },
   propertyCard: {
     width: width * 0.85,
-    height: 360,
+    height: 350,
     marginRight: 16,
     borderRadius: 20,
     overflow: "hidden",
@@ -457,5 +529,78 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 10,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    maxHeight: "80%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+    paddingHorizontal: 4,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#000",
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalScrollContent: {
+    paddingBottom: 20,
+    paddingHorizontal: 4,
+  },
+  modalCategoriesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingRight: 8,
+  },
+  modalCategoryCard: {
+    width: "31%", // 3 cards per row with space between
+    aspectRatio: 1,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    marginBottom: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+  },
+  modalCategoryIcon: {
+    fontSize: 36,
+    marginBottom: 10,
+  },
+  modalCategoryName: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
   },
 });
