@@ -8,32 +8,32 @@ const settingsOptions = [
   {
     section: "Account",
     items: [
-      { icon: "person-outline", title: "Profile Information", subtitle: "Manage your personal details" },
-      { icon: "card-outline", title: "Payment Methods", subtitle: "Manage cards and billing" },
-      { icon: "shield-checkmark-outline", title: "Privacy & Security", subtitle: "Password and privacy settings" }
+      { icon: "person-outline", title: "Profile Information", subtitle: "Manage your personal details", route: "/settings/profile" },
+      { icon: "card-outline", title: "Payment Methods", subtitle: "Manage cards and billing", route: "/settings/payment" },
+      { icon: "shield-checkmark-outline", title: "Privacy & Security", subtitle: "Password and privacy settings", route: "/settings/privacy" }
     ]
   },
   {
     section: "Preferences",
     items: [
-      { icon: "notifications-outline", title: "Notifications", subtitle: "Push notifications and alerts" },
-      { icon: "language-outline", title: "Language", subtitle: "English (US)" },
-      { icon: "moon-outline", title: "Dark Mode", subtitle: "Appearance settings" }
+      { icon: "notifications-outline", title: "Notifications", subtitle: "Push notifications and alerts", route: "/settings/notifications" },
+      { icon: "language-outline", title: "Language", subtitle: "English (US)", route: "/settings/language" },
+      { icon: "moon-outline", title: "Dark Mode", subtitle: "Appearance settings", route: "/settings/dark-mode" }
     ]
   },
   {
     section: "Support",
     items: [
-      { icon: "help-circle-outline", title: "Help Center", subtitle: "FAQs and support articles" },
-      { icon: "chatbubble-outline", title: "Contact Us", subtitle: "Get in touch with support" },
-      { icon: "star-outline", title: "Rate App", subtitle: "Share your feedback" }
+      { icon: "help-circle-outline", title: "Help Center", subtitle: "FAQs and support articles", route: "/settings/help-center" },
+      { icon: "chatbubble-outline", title: "Contact Us", subtitle: "Get in touch with support", route: "/settings/contact" },
+      { icon: "star-outline", title: "Rate App", subtitle: "Share your feedback", route: "/settings/rate-app" }
     ]
   },
   {
     section: "Legal",
     items: [
-      { icon: "document-text-outline", title: "Terms of Service", subtitle: "Read our terms" },
-      { icon: "lock-closed-outline", title: "Privacy Policy", subtitle: "Your privacy matters" }
+      { icon: "document-text-outline", title: "Terms of Service", subtitle: "Read our terms", route: "/settings/terms" },
+      { icon: "lock-closed-outline", title: "Privacy Policy", subtitle: "Your privacy matters", route: "/settings/privacy-policy" }
     ]
   }
 ];
@@ -46,8 +46,16 @@ export default function SettingsScreen() {
     router.replace("/(auth)/getstarted");
   };
 
+  const handleNavigate = (route: string) => {
+    router.push(route as any);
+  };
+
   const renderSettingItem = (item: typeof settingsOptions[0]['items'][0]) => (
-    <Pressable key={item.title} style={styles.settingItem}>
+    <Pressable 
+      key={item.title} 
+      style={styles.settingItem}
+      onPress={() => handleNavigate(item.route)}
+    >
       <View style={styles.settingIcon}>
         <Ionicons name={item.icon as any} size={20} color="#6B7280" />
       </View>
