@@ -1,0 +1,18 @@
+# Dependencies
+# Ignore the node_modules directory to avoid uploading thousands of package files.
+/node_modules
+
+# Environment Variables
+# CRITICAL: This file contains sensitive keys, passwords, and database URIs.
+# Never commit this file to version control.
+.env
+
+# Log files
+# Ignore log files that may contain sensitive information.
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS specific files
+.DS_Store
