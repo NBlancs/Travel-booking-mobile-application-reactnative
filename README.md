@@ -180,4 +180,4 @@ For questions, issues, or contributions, please:
 
 ---
 
-**Built with ❤️ using React Native and Expo**
+**Built with ❤️ using React Native and Expo**/
