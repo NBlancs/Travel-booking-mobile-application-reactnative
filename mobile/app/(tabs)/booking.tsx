@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { destinations, Destination } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
-const cardWidth = (width - 32); // /2 if you want two cards per row with padding
+const cardWidth = (width - 48) / 2; // Two cards per row with padding and gap
 const HEADER_HEIGHT = 95; // Height of the header section
 
 export default function BookingScreen() {
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: cardWidth,
-    height: 120,
+    height: 180,
     borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#000",
