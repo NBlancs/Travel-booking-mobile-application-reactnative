@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ScrollView, Pressable, Switch, ActivityIndicato
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { settingsStorage } from "../../lib/api";
+import { useTheme } from "../../context/ThemeContext";
 
 interface NotificationSettings {
   pushEnabled: boolean;
@@ -27,6 +28,7 @@ const defaultSettings: NotificationSettings = {
 };
 
 export default function NotificationsScreen() {
+  const { colors } = useTheme();
   const [settings, setSettings] = useState<NotificationSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,142 +59,142 @@ export default function NotificationsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563EB" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Notifications</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Notifications</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Notification Channels */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notification Channels</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Notification Channels</Text>
           
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="phone-portrait-outline" size={20} color="#6B7280" />
+              <Ionicons name="phone-portrait-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Push Notifications</Text>
-                <Text style={styles.menuItemSubtext}>Receive in-app alerts</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Push Notifications</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Receive in-app alerts</Text>
               </View>
             </View>
             <Switch
               value={settings.pushEnabled}
               onValueChange={(v) => updateSetting("pushEnabled", v)}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={settings.pushEnabled ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: "#93C5FD" }}
+              thumbColor={settings.pushEnabled ? colors.primary : "#F3F4F6"}
             />
           </View>
 
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="mail-outline" size={20} color="#6B7280" />
+              <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Email Notifications</Text>
-                <Text style={styles.menuItemSubtext}>Receive updates via email</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Email Notifications</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Receive updates via email</Text>
               </View>
             </View>
             <Switch
               value={settings.emailEnabled}
               onValueChange={(v) => updateSetting("emailEnabled", v)}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={settings.emailEnabled ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: "#93C5FD" }}
+              thumbColor={settings.emailEnabled ? colors.primary : "#F3F4F6"}
             />
           </View>
 
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="chatbox-outline" size={20} color="#6B7280" />
+              <Ionicons name="chatbox-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>SMS Notifications</Text>
-                <Text style={styles.menuItemSubtext}>Receive text messages</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>SMS Notifications</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Receive text messages</Text>
               </View>
             </View>
             <Switch
               value={settings.smsEnabled}
               onValueChange={(v) => updateSetting("smsEnabled", v)}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={settings.smsEnabled ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: "#93C5FD" }}
+              thumbColor={settings.smsEnabled ? colors.primary : "#F3F4F6"}
             />
           </View>
         </View>
 
         {/* Notification Types */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>What to Receive</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>What to Receive</Text>
           
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+              <Ionicons name="calendar-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Booking Updates</Text>
-                <Text style={styles.menuItemSubtext}>Trip confirmations & changes</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Booking Updates</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Trip confirmations & changes</Text>
               </View>
             </View>
             <Switch
               value={settings.bookingUpdates}
               onValueChange={(v) => updateSetting("bookingUpdates", v)}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={settings.bookingUpdates ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: "#93C5FD" }}
+              thumbColor={settings.bookingUpdates ? colors.primary : "#F3F4F6"}
             />
           </View>
 
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="pricetag-outline" size={20} color="#6B7280" />
+              <Ionicons name="pricetag-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Special Offers</Text>
-                <Text style={styles.menuItemSubtext}>Deals and promotions</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Special Offers</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Deals and promotions</Text>
               </View>
             </View>
             <Switch
               value={settings.specialOffers}
               onValueChange={(v) => updateSetting("specialOffers", v)}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={settings.specialOffers ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: "#93C5FD" }}
+              thumbColor={settings.specialOffers ? colors.primary : "#F3F4F6"}
             />
           </View>
 
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="bulb-outline" size={20} color="#6B7280" />
+              <Ionicons name="bulb-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Travel Tips</Text>
-                <Text style={styles.menuItemSubtext}>Recommendations & guides</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Travel Tips</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Recommendations & guides</Text>
               </View>
             </View>
             <Switch
               value={settings.travelTips}
               onValueChange={(v) => updateSetting("travelTips", v)}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={settings.travelTips ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: "#93C5FD" }}
+              thumbColor={settings.travelTips ? colors.primary : "#F3F4F6"}
             />
           </View>
 
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="trending-down-outline" size={20} color="#6B7280" />
+              <Ionicons name="trending-down-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Price Alerts</Text>
-                <Text style={styles.menuItemSubtext}>Price drops on saved trips</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Price Alerts</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Price drops on saved trips</Text>
               </View>
             </View>
             <Switch
               value={settings.priceAlerts}
               onValueChange={(v) => updateSetting("priceAlerts", v)}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={settings.priceAlerts ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: "#93C5FD" }}
+              thumbColor={settings.priceAlerts ? colors.primary : "#F3F4F6"}
             />
           </View>
         </View>

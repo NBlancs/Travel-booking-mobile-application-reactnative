@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, ScrollView, Pressable, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function ContactScreen() {
+  const { colors } = useTheme();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -23,69 +25,69 @@ export default function ContactScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Contact Us</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Contact Us</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.description}>
+        <Text style={[styles.description, { color: colors.textSecondary }]}>
           Have a question or feedback? We'd love to hear from you.
         </Text>
 
         {/* Contact Methods */}
         <View style={styles.contactMethods}>
-          <View style={styles.contactCard}>
-            <View style={styles.contactIconContainer}>
+          <View style={[styles.contactCard, { backgroundColor: colors.surface }]}>
+            <View style={[styles.contactIconContainer, { backgroundColor: colors.background }]}>
               <Ionicons name="mail-outline" size={24} color="#2563EB" />
             </View>
-            <Text style={styles.contactTitle}>Email</Text>
-            <Text style={styles.contactValue}>support@travelapp.com</Text>
+            <Text style={[styles.contactTitle, { color: colors.text }]}>Email</Text>
+            <Text style={[styles.contactValue, { color: colors.textSecondary }]}>support@travelapp.com</Text>
           </View>
 
-          <View style={styles.contactCard}>
-            <View style={styles.contactIconContainer}>
+          <View style={[styles.contactCard, { backgroundColor: colors.surface }]}>
+            <View style={[styles.contactIconContainer, { backgroundColor: colors.background }]}>
               <Ionicons name="call-outline" size={24} color="#10B981" />
             </View>
-            <Text style={styles.contactTitle}>Phone</Text>
-            <Text style={styles.contactValue}>+1 (555) 123-4567</Text>
+            <Text style={[styles.contactTitle, { color: colors.text }]}>Phone</Text>
+            <Text style={[styles.contactValue, { color: colors.textSecondary }]}>+1 (555) 123-4567</Text>
           </View>
 
-          <View style={styles.contactCard}>
-            <View style={styles.contactIconContainer}>
+          <View style={[styles.contactCard, { backgroundColor: colors.surface }]}>
+            <View style={[styles.contactIconContainer, { backgroundColor: colors.background }]}>
               <Ionicons name="time-outline" size={24} color="#F59E0B" />
             </View>
-            <Text style={styles.contactTitle}>Hours</Text>
-            <Text style={styles.contactValue}>24/7 Support</Text>
+            <Text style={[styles.contactTitle, { color: colors.text }]}>Hours</Text>
+            <Text style={[styles.contactValue, { color: colors.textSecondary }]}>24/7 Support</Text>
           </View>
         </View>
 
         {/* Contact Form */}
         <View style={styles.formSection}>
-          <Text style={styles.formTitle}>Send us a message</Text>
+          <Text style={[styles.formTitle, { color: colors.text }]}>Send us a message</Text>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={[styles.label, { color: colors.text }]}>Full Name</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
               placeholder="Enter your name"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textSecondary}
               value={name}
               onChangeText={setName}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
+            <Text style={[styles.label, { color: colors.text }]}>Email Address</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
               placeholder="Enter your email"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textSecondary}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -94,22 +96,22 @@ export default function ContactScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Subject</Text>
+            <Text style={[styles.label, { color: colors.text }]}>Subject</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
               placeholder="What is this about?"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textSecondary}
               value={subject}
               onChangeText={setSubject}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Message</Text>
+            <Text style={[styles.label, { color: colors.text }]}>Message</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.input, styles.textArea, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
               placeholder="Tell us more about your inquiry..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textSecondary}
               value={message}
               onChangeText={setMessage}
               multiline

@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, ScrollView, Pressable, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function RateAppScreen() {
+  const { colors } = useTheme();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
 
@@ -27,28 +29,28 @@ export default function RateAppScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Rate App</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Rate App</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {/* App Icon */}
         <View style={styles.appIconContainer}>
-          <View style={styles.appIcon}>
-            <Ionicons name="airplane" size={48} color="#2563EB" />
+          <View style={[styles.appIcon, { backgroundColor: colors.surface }]}>
+            <Ionicons name="airplane" size={48} color={colors.primary} />
           </View>
-          <Text style={styles.appName}>TravelBooking</Text>
+          <Text style={[styles.appName, { color: colors.text }]}>TravelBooking</Text>
         </View>
 
         {/* Rating Section */}
-        <View style={styles.ratingSection}>
-          <Text style={styles.ratingTitle}>How would you rate your experience?</Text>
+        <View style={[styles.ratingSection, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.ratingTitle, { color: colors.text }]}>How would you rate your experience?</Text>
           <View style={styles.starsContainer}>
             {[1, 2, 3, 4, 5].map((star) => (
               <Pressable
@@ -61,17 +63,20 @@ export default function RateAppScreen() {
                 <Ionicons
                   name={star <= (hoveredRating || rating) ? "star" : "star-outline"}
                   size={48}
-                  color={star <= (hoveredRating || rating) ? "#F59E0B" : "#D1D5DB"}
+                  color={star <= (hoveredRating || rating) ? "#F59E0B" : colors.border}
                 />
               </Pressable>
             ))}
           </View>
-          <Text style={styles.ratingMessage}>{getRatingMessage()}</Text>
+          <Text style={[styles.ratingMessage, { color: colors.textSecondary }]}>{getRatingMessage()}</Text>
         </View>
 
         {/* Submit Button */}
         <Pressable
-          style={[styles.submitButton, rating === 0 && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton, 
+            { backgroundColor: rating === 0 ? colors.border : colors.primary }
+          ]}
           onPress={handleSubmitRating}
           disabled={rating === 0}
         >
@@ -79,35 +84,35 @@ export default function RateAppScreen() {
         </Pressable>
 
         {/* Features List */}
-        <View style={styles.featuresSection}>
-          <Text style={styles.featuresTitle}>What users love about us:</Text>
+        <View style={[styles.featuresSection, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.featuresTitle, { color: colors.text }]}>What users love about us:</Text>
           <View style={styles.featureItem}>
             <Ionicons name="checkmark-circle" size={20} color="#10B981" />
-            <Text style={styles.featureText}>Easy booking process</Text>
+            <Text style={[styles.featureText, { color: colors.textSecondary }]}>Easy booking process</Text>
           </View>
           <View style={styles.featureItem}>
             <Ionicons name="checkmark-circle" size={20} color="#10B981" />
-            <Text style={styles.featureText}>Wide selection of properties</Text>
+            <Text style={[styles.featureText, { color: colors.textSecondary }]}>Wide selection of properties</Text>
           </View>
           <View style={styles.featureItem}>
             <Ionicons name="checkmark-circle" size={20} color="#10B981" />
-            <Text style={styles.featureText}>Secure payment methods</Text>
+            <Text style={[styles.featureText, { color: colors.textSecondary }]}>Secure payment methods</Text>
           </View>
           <View style={styles.featureItem}>
             <Ionicons name="checkmark-circle" size={20} color="#10B981" />
-            <Text style={styles.featureText}>24/7 customer support</Text>
+            <Text style={[styles.featureText, { color: colors.textSecondary }]}>24/7 customer support</Text>
           </View>
         </View>
 
         {/* Alternative Actions */}
         <View style={styles.alternativeActions}>
-          <Pressable style={styles.alternativeButton}>
-            <Ionicons name="chatbubble-ellipses-outline" size={20} color="#2563EB" />
-            <Text style={styles.alternativeButtonText}>Send Feedback</Text>
+          <Pressable style={[styles.alternativeButton, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.primary} />
+            <Text style={[styles.alternativeButtonText, { color: colors.primary }]}>Send Feedback</Text>
           </Pressable>
-          <Pressable style={styles.alternativeButton}>
-            <Ionicons name="share-social-outline" size={20} color="#2563EB" />
-            <Text style={styles.alternativeButtonText}>Share App</Text>
+          <Pressable style={[styles.alternativeButton, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="share-social-outline" size={20} color={colors.primary} />
+            <Text style={[styles.alternativeButtonText, { color: colors.primary }]}>Share App</Text>
           </Pressable>
         </View>
       </ScrollView>

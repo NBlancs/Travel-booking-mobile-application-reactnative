@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ScrollView, Pressable, ActivityIndicator } from
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { settingsStorage } from "../../lib/api";
+import { useTheme } from "../../context/ThemeContext";
 
 const languages = [
   { code: "en", name: "English (US)", flag: "🇺🇸" },
@@ -19,6 +20,7 @@ const languages = [
 const LANGUAGE_KEY = "selected_language";
 
 export default function LanguageScreen() {
+  const { colors } = useTheme();
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,25 +47,25 @@ export default function LanguageScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563EB" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Language</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Language</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.description}>
+        <Text style={[styles.description, { color: colors.textSecondary }]}>
           Select your preferred language for the app interface
         </Text>
 
@@ -71,13 +73,13 @@ export default function LanguageScreen() {
           {languages.map((language) => (
             <Pressable
               key={language.code}
-              style={styles.languageItem}
+              style={[styles.languageItem, { backgroundColor: colors.surface }]}
               onPress={() => handleLanguageSelect(language.code)}
             >
               <Text style={styles.flag}>{language.flag}</Text>
-              <Text style={styles.languageName}>{language.name}</Text>
+              <Text style={[styles.languageName, { color: colors.text }]}>{language.name}</Text>
               {selectedLanguage === language.code && (
-                <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
+                <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
               )}
             </Pressable>
           ))}

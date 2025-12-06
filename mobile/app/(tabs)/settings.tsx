@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import { router } from "expo-router";
 
 const settingsOptions = [
@@ -40,6 +41,7 @@ const settingsOptions = [
 
 export default function SettingsScreen() {
   const { user, signOut } = useAuth();
+  const { colors, isDark } = useTheme();
 
   const handleSignOut = () => {
     signOut();
@@ -56,39 +58,39 @@ export default function SettingsScreen() {
       style={styles.settingItem}
       onPress={() => handleNavigate(item.route)}
     >
-      <View style={styles.settingIcon}>
-        <Ionicons name={item.icon as any} size={20} color="#6B7280" />
+      <View style={[styles.settingIcon, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}>
+        <Ionicons name={item.icon as any} size={20} color={colors.textSecondary} />
       </View>
       <View style={styles.settingContent}>
-        <Text style={styles.settingTitle}>{item.title}</Text>
-        <Text style={styles.settingSubtitle}>{item.subtitle}</Text>
+        <Text style={[styles.settingTitle, { color: colors.text }]}>{item.title}</Text>
+        <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>{item.subtitle}</Text>
       </View>
-      <Ionicons name="chevron-forward-outline" size={16} color="#9CA3AF" />
+      <Ionicons name="chevron-forward-outline" size={16} color={colors.textSecondary} />
     </Pressable>
   );
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
       {/* User Profile Header */}
-      <View style={styles.profileHeader}>
-        <View style={styles.avatar}>
+      <View style={[styles.profileHeader, { backgroundColor: colors.surface }]}>
+        <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
           <Ionicons name="person" size={32} color="#FFFFFF" />
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.userName}>Welcome back!</Text>
-          <Text style={styles.userEmail}>{user?.email || "user@example.com"}</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>Welcome back!</Text>
+          <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{user?.email || "user@example.com"}</Text>
         </View>
       </View>
 
       {/* Settings Sections */}
       {settingsOptions.map((section) => (
         <View key={section.section} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.section}</Text>
-          <View style={styles.sectionCard}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{section.section}</Text>
+          <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
             {section.items.map((item, index) => (
               <View key={item.title}>
                 {renderSettingItem(item)}
-                {index < section.items.length - 1 && <View style={styles.divider} />}
+                {index < section.items.length - 1 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
               </View>
             ))}
           </View>
@@ -97,15 +99,15 @@ export default function SettingsScreen() {
 
       {/* Sign Out Button */}
       <View style={styles.section}>
-        <Pressable style={styles.signOutButton} onPress={handleSignOut}>
-          <Ionicons name="log-out-outline" size={20} color="#DC2626" />
-          <Text style={styles.signOutText}>Sign Out</Text>
+        <Pressable style={[styles.signOutButton, { backgroundColor: colors.surface, borderColor: colors.error }]} onPress={handleSignOut}>
+          <Ionicons name="log-out-outline" size={20} color={colors.error} />
+          <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
         </Pressable>
       </View>
 
       {/* App Version */}
       <View style={styles.footer}>
-        <Text style={styles.versionText}>Travel Booking App v1.0.0</Text>
+        <Text style={[styles.versionText, { color: colors.textSecondary }]}>Travel Booking App v1.0.0</Text>
       </View>
 
       {/* Bottom spacing for tab bar */}

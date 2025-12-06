@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { StyleSheet, Text, View, ScrollView, ImageBackground, Pressable, ActivityIndicator, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useBooking } from "../../context/BookingContext";
+import { useTheme } from "../../context/ThemeContext";
 import { destinations, Destination } from "../../data/destinations";
 import { Booking } from "../../lib/api";
 
@@ -30,6 +31,7 @@ const calculateDays = (checkIn: string, checkOut: string): string => {
 
 export default function ScheduleScreen() {
   const { bookings, isLoading, fetchBookings, clearNewBookingFlag } = useBooking();
+  const { colors, isDark } = useTheme();
   const [refreshing, setRefreshing] = React.useState(false);
 
   // Fetch bookings on mount and clear notification
@@ -112,48 +114,48 @@ export default function ScheduleScreen() {
   );
 
   const renderScheduleItem = (item: { time: string; activity: string; type: string }, index: number) => (
-    <View key={index} style={styles.scheduleItem}>
-      <Text style={styles.scheduleTime}>{item.time}</Text>
+    <View key={index} style={[styles.scheduleItem, { borderBottomColor: colors.border }]}>
+      <Text style={[styles.scheduleTime, { color: colors.textSecondary }]}>{item.time}</Text>
       <View style={styles.scheduleContent}>
-        <Text style={styles.scheduleActivity}>{item.activity}</Text>
-        <Text style={styles.scheduleType}>{item.type}</Text>
+        <Text style={[styles.scheduleActivity, { color: colors.text }]}>{item.activity}</Text>
+        <Text style={[styles.scheduleType, { color: colors.textSecondary }]}>{item.type}</Text>
       </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ImageBackground
         source={require("../../assets/images/skyblue.jpg")}
         style={styles.backgroundImage}
         resizeMode="cover"
-        imageStyle={{ opacity: 0.25 }}
+        imageStyle={{ opacity: isDark ? 0.1 : 0.25 }}
       >
         <ScrollView 
           style={styles.scrollView} 
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.text} />
           }
         >
           {/* Loading State */}
           {isLoading && !refreshing && (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#2563EB" />
-              <Text style={styles.loadingText}>Loading your trips...</Text>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading your trips...</Text>
             </View>
           )}
 
           {/* Upcoming Trips Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Upcoming Trips</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Upcoming Trips</Text>
             {upcomingBookings.length > 0 ? (
               upcomingBookings.map(renderTripCard)
             ) : (
               <View style={styles.emptyState}>
-                <Ionicons name="airplane-outline" size={48} color="#9CA3AF" />
-                <Text style={styles.emptyStateTitle}>No upcoming trips</Text>
-                <Text style={styles.emptyStateText}>
+                <Ionicons name="airplane-outline" size={48} color={colors.textSecondary} />
+                <Text style={[styles.emptyStateTitle, { color: colors.text }]}>No upcoming trips</Text>
+                <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
                   Start planning your next adventure by booking a destination!
                 </Text>
               </View>
@@ -163,9 +165,9 @@ export default function ScheduleScreen() {
           {/* Today's Schedule Section */}
           {todaySchedule.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Today's Schedule</Text>
-              <View style={styles.scheduleCard}>
-                <Text style={styles.scheduleDate}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Today's Schedule</Text>
+              <View style={[styles.scheduleCard, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.scheduleDate, { color: colors.textSecondary }]}>
                   {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                 </Text>
                 {todaySchedule.map(renderScheduleItem)}

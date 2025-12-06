@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, ScrollView, Pressable, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
 
 const faqs = [
   {
@@ -31,6 +32,7 @@ const faqs = [
 ];
 
 export default function HelpCenterScreen() {
+  const { colors } = useTheme();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -41,24 +43,24 @@ export default function HelpCenterScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Help Center</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Help Center</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={20} color="#6B7280" />
+        <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Ionicons name="search-outline" size={20} color={colors.textSecondary} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search for help..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -67,47 +69,47 @@ export default function HelpCenterScreen() {
         {/* Quick Actions */}
         <View style={styles.quickActions}>
           <Pressable style={styles.actionButton}>
-            <View style={styles.actionIconContainer}>
+            <View style={[styles.actionIconContainer, { backgroundColor: colors.surface }]}>
               <Ionicons name="chatbubble-ellipses-outline" size={24} color="#2563EB" />
             </View>
-            <Text style={styles.actionText}>Live Chat</Text>
+            <Text style={[styles.actionText, { color: colors.textSecondary }]}>Live Chat</Text>
           </Pressable>
 
           <Pressable style={styles.actionButton}>
-            <View style={styles.actionIconContainer}>
+            <View style={[styles.actionIconContainer, { backgroundColor: colors.surface }]}>
               <Ionicons name="call-outline" size={24} color="#10B981" />
             </View>
-            <Text style={styles.actionText}>Call Support</Text>
+            <Text style={[styles.actionText, { color: colors.textSecondary }]}>Call Support</Text>
           </Pressable>
 
           <Pressable style={styles.actionButton}>
-            <View style={styles.actionIconContainer}>
+            <View style={[styles.actionIconContainer, { backgroundColor: colors.surface }]}>
               <Ionicons name="mail-outline" size={24} color="#F59E0B" />
             </View>
-            <Text style={styles.actionText}>Email Us</Text>
+            <Text style={[styles.actionText, { color: colors.textSecondary }]}>Email Us</Text>
           </Pressable>
         </View>
 
         {/* FAQs */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Frequently Asked Questions</Text>
           
           {filteredFaqs.map((faq, index) => (
             <Pressable
               key={index}
-              style={styles.faqItem}
+              style={[styles.faqItem, { backgroundColor: colors.surface }]}
               onPress={() => setExpandedIndex(expandedIndex === index ? null : index)}
             >
               <View style={styles.faqHeader}>
-                <Text style={styles.faqQuestion}>{faq.question}</Text>
+                <Text style={[styles.faqQuestion, { color: colors.text }]}>{faq.question}</Text>
                 <Ionicons
                   name={expandedIndex === index ? "chevron-up" : "chevron-down"}
                   size={20}
-                  color="#6B7280"
+                  color={colors.textSecondary}
                 />
               </View>
               {expandedIndex === index && (
-                <Text style={styles.faqAnswer}>{faq.answer}</Text>
+                <Text style={[styles.faqAnswer, { color: colors.textSecondary }]}>{faq.answer}</Text>
               )}
             </Pressable>
           ))}

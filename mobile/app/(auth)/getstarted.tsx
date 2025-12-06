@@ -1,13 +1,17 @@
 import React from "react";
 import { ImageBackground, StyleSheet, Text, View, Pressable, Image } from "react-native";
 import { Link } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function GetStartedScreen() {
+  const { colors, isDark } = useTheme();
+
   return (
     <ImageBackground
       source={require("../../assets/images/skyblue.jpg")}
-      style={styles.bg}
+      style={[styles.bg, { backgroundColor: colors.background }]}
       resizeMode="cover"
+      imageStyle={{ opacity: isDark ? 0.3 : 1 }}
     >
       <View style={styles.container}>
         <View style={styles.imageContainer}>
@@ -18,14 +22,14 @@ export default function GetStartedScreen() {
           />
         </View>
 
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>Turn Your Travel Dreams Into Reality</Text>
-          <Text style={styles.subtitle}>
+        <View style={[styles.contentContainer, { backgroundColor: isDark ? "rgba(31, 41, 55, 0.95)" : "rgba(255,255,255,0.95)" }]}>
+          <Text style={[styles.title, { color: colors.text }]}>Turn Your Travel Dreams Into Reality</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Find the perfect getaway from thousands of destinations around the world
           </Text>
 
           <Link href="/(auth)/login" asChild>
-            <Pressable style={styles.button}>
+            <Pressable style={[styles.button, { backgroundColor: colors.primary }]}>
               <Text style={styles.buttonText}>GET STARTED</Text>
             </Pressable>
           </Link>
@@ -38,7 +42,6 @@ export default function GetStartedScreen() {
 const styles = StyleSheet.create({
   bg: { 
     flex: 1, 
-    backgroundColor: "#87CEEB" 
   },
   container: { 
     flex: 1, 
@@ -58,7 +61,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   contentContainer: {
-    backgroundColor: "rgba(255,255,255,0.95)",
     borderRadius: 16,
     padding: 32,
     alignItems: "center",
@@ -73,19 +75,16 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     textAlign: "center",
-    color: "#1F2937",
     lineHeight: 36,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#6B7280",
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 16,
   },
   button: {
-    backgroundColor: "#2563EB",
     paddingVertical: 16,
     paddingHorizontal: 48,
     borderRadius: 25,

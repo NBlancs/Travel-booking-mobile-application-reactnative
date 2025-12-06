@@ -3,9 +3,11 @@ import { Link, router } from "expo-router";
 import { Alert, Image, ImageBackground, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const { colors, isDark } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,8 +32,9 @@ export default function LoginScreen() {
   return (
     <ImageBackground
       source={require("../../assets/images/skyblue.jpg")}
-      style={styles.bg}
+      style={[styles.bg, { backgroundColor: colors.background }]}
       resizeMode="cover"
+      imageStyle={{ opacity: isDark ? 0.3 : 1 }}
     >
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
         <Image 
@@ -39,23 +42,25 @@ export default function LoginScreen() {
           style={styles.logo}
           resizeMode="contain"
         />
-        <View style={styles.card}>
-          <Text style={styles.title}>Welcome back</Text>
+        <View style={[styles.card, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.title, { color: colors.text }]}>Welcome back</Text>
           <TextInput
             value={email}
             onChangeText={setEmail}
             placeholder="Email"
+            placeholderTextColor={colors.textSecondary}
             autoCapitalize="none"
             keyboardType="email-address"
-            style={styles.input}
+            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
           />
-          <View style={styles.passwordContainer}>
+          <View style={[styles.passwordContainer, { borderColor: colors.border, backgroundColor: colors.background }]}>
             <TextInput
               value={password}
               onChangeText={setPassword}
               placeholder="Password"
+              placeholderTextColor={colors.textSecondary}
               secureTextEntry={!showPassword}
-              style={styles.passwordInput}
+              style={[styles.passwordInput, { color: colors.text }]}
             />
             <Pressable 
               onPress={() => setShowPassword(!showPassword)}
@@ -64,16 +69,16 @@ export default function LoginScreen() {
               <Ionicons 
                 name={showPassword ? "eye-off-outline" : "eye-outline"} 
                 size={22} 
-                color="#666" 
+                color={colors.textSecondary} 
               />
             </Pressable>
           </View>
-          <Pressable style={[styles.button, loading && { opacity: 0.6 }]} disabled={loading} onPress={onSubmit}>
+          <Pressable style={[styles.button, { backgroundColor: colors.primary }, loading && { opacity: 0.6 }]} disabled={loading} onPress={onSubmit}>
             <Text style={styles.buttonText}>{loading ? "Signing in..." : "Login"}</Text>
           </Pressable>
           <View style={styles.footerRow}>
-            <Text>New here? </Text>
-            <Link href={"/(auth)/register" as any} style={styles.link}>Create an account</Link>
+            <Text style={{ color: colors.text }}>New here? </Text>
+            <Link href={"/(auth)/register" as any} style={[styles.link, { color: colors.primary }]}>Create an account</Link>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -82,17 +87,16 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  bg: { flex: 1, backgroundColor: "#87CEEB" },
+  bg: { flex: 1 },
   container: { flex: 1, justifyContent: "center", padding: 24 },
   logo: { width: 350, height: 120, alignSelf: "center", marginBottom: 32 },
-  card: { backgroundColor: "rgba(255,255,255,0.75)", borderRadius: 12, padding: 20, gap: 12, elevation: 0 },
+  card: { borderRadius: 12, padding: 20, gap: 12, elevation: 0 },
   title: { fontSize: 22, fontWeight: "600", marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: "#b8adadff", borderRadius: 8, padding: 12 },
+  input: { borderWidth: 1, borderRadius: 8, padding: 12 },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#b8adadff",
     borderRadius: 8,
     paddingRight: 12,
   },
@@ -103,8 +107,8 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: 4,
   },
-  button: { backgroundColor: "#2563EB", padding: 14, borderRadius: 8, alignItems: "center", marginTop: 4 },
+  button: { padding: 14, borderRadius: 8, alignItems: "center", marginTop: 4 },
   buttonText: { color: "#fff", fontWeight: "600" },
   footerRow: { flexDirection: "row", justifyContent: "center", marginTop: 8 },
-  link: { color: "#2563EB", fontWeight: "600" },
+  link: { fontWeight: "600" },
 });

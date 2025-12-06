@@ -19,12 +19,14 @@ import { router, useLocalSearchParams } from "expo-router";
 import { destinations } from "../data/destinations";
 import { bookingsApi, CreateBookingData } from "../lib/api";
 import { useBooking } from "../context/BookingContext";
+import { useTheme } from "../context/ThemeContext";
 
 const { width, height } = Dimensions.get("window");
 
 export default function PropertyDetailsScreen() {
   const { id } = useLocalSearchParams();
   const destination = destinations.find((d) => d.id === Number(id));
+  const { colors, isDark } = useTheme();
   const [isFavorite, setIsFavorite] = useState(false);
   
   // Booking Modal State
@@ -132,7 +134,7 @@ export default function PropertyDetailsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle="light-content" />
       
       {/* Hero Image Section */}
@@ -144,7 +146,7 @@ export default function PropertyDetailsScreen() {
         />
         
         {/* Curved Bottom Overlay */}
-        <View style={styles.curvedOverlay}>
+        <View style={[styles.curvedOverlay, { backgroundColor: colors.background }]}>
           <View style={styles.badgesContainer}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{propertyDetails.guests}</Text>
@@ -164,20 +166,20 @@ export default function PropertyDetailsScreen() {
         {/* Header Buttons */}
         <View style={styles.headerButtons}>
           <Pressable
-            style={styles.backButton}
+            style={[styles.backButton, { backgroundColor: colors.surface }]}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#000" />
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <Text style={styles.headerTitle}>Details</Text>
           <Pressable
-            style={styles.favoriteButton}
+            style={[styles.favoriteButton, { backgroundColor: colors.surface }]}
             onPress={() => setIsFavorite(!isFavorite)}
           >
             <Ionicons
               name={isFavorite ? "heart" : "heart-outline"}
               size={24}
-              color={isFavorite ? "#FF385C" : "#000"}
+              color={isFavorite ? "#FF385C" : colors.text}
             />
           </Pressable>
         </View>
@@ -185,11 +187,11 @@ export default function PropertyDetailsScreen() {
 
       {/* Content Section */}
       <ScrollView
-        style={styles.contentSection}
+        style={[styles.contentSection, { backgroundColor: colors.background }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Property Title */}
-        <Text style={styles.propertyTitle}>
+        <Text style={[styles.propertyTitle, { color: colors.text }]}>
           {destination.name === "Osaka" || destination.name === "Kuala Lumpur" || destination.name === "Buenos Aires"
             ? `${destination.name} Luxury Oceanview Villa by Are Amar Stays`
             : `${destination.name} Luxury Villa by Are Amar Stays`}
@@ -197,21 +199,21 @@ export default function PropertyDetailsScreen() {
 
         {/* Address */}
         <View style={styles.addressContainer}>
-          <Ionicons name="location-outline" size={18} color="#666" />
-          <Text style={styles.addressText}>{propertyDetails.address}</Text>
+          <Ionicons name="location-outline" size={18} color={colors.textSecondary} />
+          <Text style={[styles.addressText, { color: colors.textSecondary }]}>{propertyDetails.address}</Text>
         </View>
 
         {/* Description Section */}
         <View style={styles.descriptionSection}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.descriptionText}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Description</Text>
+          <Text style={[styles.descriptionText, { color: colors.textSecondary }]}>
             {propertyDetails.description}
           </Text>
         </View>
 
         {/* Gallery Section */}
         <View style={styles.gallerySection}>
-          <Text style={styles.sectionTitle}>Gallery</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Gallery</Text>
           <Pressable>
             <Text style={styles.seeAllLink}>See All</Text>
           </Pressable>
@@ -222,10 +224,10 @@ export default function PropertyDetailsScreen() {
       </ScrollView>
 
       {/* Footer with Price and Book Button */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
         <View style={styles.priceContainer}>
-          <Text style={styles.priceAmount}>{destination.priceFormatted}</Text>
-          <Text style={styles.priceLabel}>/night</Text>
+          <Text style={[styles.priceAmount, { color: colors.text }]}>{destination.priceFormatted}</Text>
+          <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>/night</Text>
         </View>
         <Pressable style={styles.bookButton} onPress={() => setShowBookingModal(true)}>
           <Text style={styles.bookButtonText}>Book Now</Text>
@@ -240,39 +242,39 @@ export default function PropertyDetailsScreen() {
         onRequestClose={() => setShowBookingModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Book Your Stay</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Book Your Stay</Text>
               <Pressable onPress={() => setShowBookingModal(false)} style={styles.modalCloseButton}>
-                <Ionicons name="close" size={24} color="#6B7280" />
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
             </View>
 
             {/* Destination Info */}
-            <View style={styles.modalDestination}>
-              <Text style={styles.modalDestinationName}>{destination.name}</Text>
-              <Text style={styles.modalDestinationCountry}>{destination.country}</Text>
+            <View style={[styles.modalDestination, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalDestinationName, { color: colors.text }]}>{destination.name}</Text>
+              <Text style={[styles.modalDestinationCountry, { color: colors.textSecondary }]}>{destination.country}</Text>
             </View>
 
             {/* Date Selection */}
             <View style={styles.dateSection}>
-              <Text style={styles.sectionLabel}>Select Dates</Text>
+              <Text style={[styles.sectionLabel, { color: colors.text }]}>Select Dates</Text>
               <View style={styles.dateRow}>
                 <Pressable 
-                  style={styles.dateButton} 
+                  style={[styles.dateButton, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]} 
                   onPress={() => setShowCheckInPicker(true)}
                 >
-                  <Text style={styles.dateLabel}>Check-in</Text>
-                  <Text style={styles.dateValue}>{formatDate(checkInDate)}</Text>
+                  <Text style={[styles.dateLabel, { color: colors.textSecondary }]}>Check-in</Text>
+                  <Text style={[styles.dateValue, { color: colors.text }]}>{formatDate(checkInDate)}</Text>
                 </Pressable>
-                <Ionicons name="arrow-forward" size={20} color="#9CA3AF" />
+                <Ionicons name="arrow-forward" size={20} color={colors.textSecondary} />
                 <Pressable 
-                  style={styles.dateButton} 
+                  style={[styles.dateButton, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]} 
                   onPress={() => setShowCheckOutPicker(true)}
                 >
-                  <Text style={styles.dateLabel}>Check-out</Text>
-                  <Text style={styles.dateValue}>{formatDate(checkOutDate)}</Text>
+                  <Text style={[styles.dateLabel, { color: colors.textSecondary }]}>Check-out</Text>
+                  <Text style={[styles.dateValue, { color: colors.text }]}>{formatDate(checkOutDate)}</Text>
                 </Pressable>
               </View>
             </View>
@@ -285,15 +287,15 @@ export default function PropertyDetailsScreen() {
               onRequestClose={() => setShowCheckInPicker(false)}
             >
               <Pressable style={styles.datePickerOverlay} onPress={() => setShowCheckInPicker(false)}>
-                <View style={styles.datePickerContent}>
-                  <Text style={styles.datePickerTitle}>Select Check-in Date</Text>
+                <View style={[styles.datePickerContent, { backgroundColor: colors.surface }]}>
+                  <Text style={[styles.datePickerTitle, { color: colors.text }]}>Select Check-in Date</Text>
                   <ScrollView style={styles.datePickerScroll} showsVerticalScrollIndicator={false}>
                     {generateDateOptions(new Date(), 90).map((date) => (
                       <Pressable
                         key={date.toISOString()}
                         style={[
                           styles.datePickerOption,
-                          checkInDate.toDateString() === date.toDateString() && styles.datePickerOptionSelected
+                          checkInDate.toDateString() === date.toDateString() && { backgroundColor: isDark ? colors.primary + "20" : "#EFF6FF" }
                         ]}
                         onPress={() => {
                           setCheckInDate(date);
@@ -305,15 +307,16 @@ export default function PropertyDetailsScreen() {
                       >
                         <Text style={[
                           styles.datePickerOptionText,
-                          checkInDate.toDateString() === date.toDateString() && styles.datePickerOptionTextSelected
+                          { color: colors.text },
+                          checkInDate.toDateString() === date.toDateString() && { color: colors.primary, fontWeight: "600" }
                         ]}>
                           {formatDateLong(date)}
                         </Text>
                       </Pressable>
                     ))}
                   </ScrollView>
-                  <Pressable style={styles.datePickerClose} onPress={() => setShowCheckInPicker(false)}>
-                    <Text style={styles.datePickerCloseText}>Cancel</Text>
+                  <Pressable style={[styles.datePickerClose, { borderTopColor: colors.border }]} onPress={() => setShowCheckInPicker(false)}>
+                    <Text style={[styles.datePickerCloseText, { color: colors.textSecondary }]}>Cancel</Text>
                   </Pressable>
                 </View>
               </Pressable>
@@ -327,15 +330,15 @@ export default function PropertyDetailsScreen() {
               onRequestClose={() => setShowCheckOutPicker(false)}
             >
               <Pressable style={styles.datePickerOverlay} onPress={() => setShowCheckOutPicker(false)}>
-                <View style={styles.datePickerContent}>
-                  <Text style={styles.datePickerTitle}>Select Check-out Date</Text>
+                <View style={[styles.datePickerContent, { backgroundColor: colors.surface }]}>
+                  <Text style={[styles.datePickerTitle, { color: colors.text }]}>Select Check-out Date</Text>
                   <ScrollView style={styles.datePickerScroll} showsVerticalScrollIndicator={false}>
                     {generateDateOptions(new Date(checkInDate.getTime() + 86400000), 90).map((date) => (
                       <Pressable
                         key={date.toISOString()}
                         style={[
                           styles.datePickerOption,
-                          checkOutDate.toDateString() === date.toDateString() && styles.datePickerOptionSelected
+                          checkOutDate.toDateString() === date.toDateString() && { backgroundColor: isDark ? colors.primary + "20" : "#EFF6FF" }
                         ]}
                         onPress={() => {
                           setCheckOutDate(date);
@@ -344,15 +347,16 @@ export default function PropertyDetailsScreen() {
                       >
                         <Text style={[
                           styles.datePickerOptionText,
-                          checkOutDate.toDateString() === date.toDateString() && styles.datePickerOptionTextSelected
+                          { color: colors.text },
+                          checkOutDate.toDateString() === date.toDateString() && { color: colors.primary, fontWeight: "600" }
                         ]}>
                           {formatDateLong(date)}
                         </Text>
                       </Pressable>
                     ))}
                   </ScrollView>
-                  <Pressable style={styles.datePickerClose} onPress={() => setShowCheckOutPicker(false)}>
-                    <Text style={styles.datePickerCloseText}>Cancel</Text>
+                  <Pressable style={[styles.datePickerClose, { borderTopColor: colors.border }]} onPress={() => setShowCheckOutPicker(false)}>
+                    <Text style={[styles.datePickerCloseText, { color: colors.textSecondary }]}>Cancel</Text>
                   </Pressable>
                 </View>
               </Pressable>
@@ -360,18 +364,18 @@ export default function PropertyDetailsScreen() {
 
             {/* Guest Counter */}
             <View style={styles.guestSection}>
-              <Text style={styles.sectionLabel}>Guests</Text>
-              <View style={styles.guestCounter}>
+              <Text style={[styles.sectionLabel, { color: colors.text }]}>Guests</Text>
+              <View style={[styles.guestCounter, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}>
                 <Pressable 
-                  style={[styles.counterButton, guests <= 1 && styles.counterButtonDisabled]}
+                  style={[styles.counterButton, { backgroundColor: colors.surface }, guests <= 1 && styles.counterButtonDisabled]}
                   onPress={() => setGuests(Math.max(1, guests - 1))}
                   disabled={guests <= 1}
                 >
                   <Ionicons name="remove" size={20} color={guests <= 1 ? "#D1D5DB" : "#2563EB"} />
                 </Pressable>
-                <Text style={styles.guestCount}>{guests}</Text>
+                <Text style={[styles.guestCount, { color: colors.text }]}>{guests}</Text>
                 <Pressable 
-                  style={[styles.counterButton, guests >= 10 && styles.counterButtonDisabled]}
+                  style={[styles.counterButton, { backgroundColor: colors.surface }, guests >= 10 && styles.counterButtonDisabled]}
                   onPress={() => setGuests(Math.min(10, guests + 1))}
                   disabled={guests >= 10}
                 >
@@ -381,18 +385,18 @@ export default function PropertyDetailsScreen() {
             </View>
 
             {/* Price Summary */}
-            <View style={styles.priceSummary}>
+            <View style={[styles.priceSummary, { backgroundColor: isDark ? colors.background : "#F9FAFB" }]}>
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel2}>{destination.priceFormatted} × {nights} night{nights > 1 ? 's' : ''}</Text>
-                <Text style={styles.priceValue}>₱{(destination.price * nights).toLocaleString()}</Text>
+                <Text style={[styles.priceLabel2, { color: colors.textSecondary }]}>{destination.priceFormatted} × {nights} night{nights > 1 ? 's' : ''}</Text>
+                <Text style={[styles.priceValue, { color: colors.text }]}>₱{(destination.price * nights).toLocaleString()}</Text>
               </View>
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel2}>Service fee</Text>
-                <Text style={styles.priceValue}>₱0</Text>
+                <Text style={[styles.priceLabel2, { color: colors.textSecondary }]}>Service fee</Text>
+                <Text style={[styles.priceValue, { color: colors.text }]}>₱0</Text>
               </View>
-              <View style={styles.priceDivider} />
+              <View style={[styles.priceDivider, { backgroundColor: colors.border }]} />
               <View style={styles.priceRow}>
-                <Text style={styles.totalLabel}>Total</Text>
+                <Text style={[styles.totalLabel, { color: colors.text }]}>Total</Text>
                 <Text style={styles.totalValue}>₱{totalPrice.toLocaleString()}</Text>
               </View>
             </View>

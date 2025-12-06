@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ScrollView, Pressable, Modal, TextInput, Alert,
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { settingsStorage } from "../../lib/api";
+import { useTheme } from "../../context/ThemeContext";
 
 interface PaymentMethod {
   id: number;
@@ -33,6 +34,7 @@ const defaultBillingAddress: BillingAddress = {
 };
 
 export default function PaymentMethodsScreen() {
+  const { colors } = useTheme();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [billingAddress, setBillingAddress] = useState<BillingAddress>(defaultBillingAddress);
   const [isLoading, setIsLoading] = useState(true);
@@ -164,40 +166,40 @@ export default function PaymentMethodsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563EB" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Payment Methods</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Payment Methods</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Payment Cards */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Saved Cards</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Saved Cards</Text>
           {paymentMethods.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="card-outline" size={48} color="#9CA3AF" />
-              <Text style={styles.emptyStateText}>No saved cards</Text>
+            <View style={[styles.emptyState, { backgroundColor: colors.surface }]}>
+              <Ionicons name="card-outline" size={48} color={colors.textSecondary} />
+              <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>No saved cards</Text>
             </View>
           ) : (
             paymentMethods.map((method) => (
-              <View key={method.id} style={styles.cardItem}>
+              <View key={method.id} style={[styles.cardItem, { backgroundColor: colors.surface }]}>
                 <View style={styles.cardIcon}>
-                  <Ionicons name="card" size={24} color="#2563EB" />
+                  <Ionicons name="card" size={24} color={colors.primary} />
                 </View>
                 <View style={styles.cardInfo}>
-                  <Text style={styles.cardType}>{method.type} •••• {method.last4}</Text>
-                  <Text style={styles.cardExpiry}>Expires {method.expiry}</Text>
+                  <Text style={[styles.cardType, { color: colors.text }]}>{method.type} •••• {method.last4}</Text>
+                  <Text style={[styles.cardExpiry, { color: colors.textSecondary }]}>Expires {method.expiry}</Text>
                 </View>
                 {method.isDefault && (
                   <View style={styles.defaultBadge}>
@@ -205,7 +207,7 @@ export default function PaymentMethodsScreen() {
                   </View>
                 )}
                 <Pressable style={styles.moreButton} onPress={() => showCardOptions(method)}>
-                  <Ionicons name="ellipsis-vertical" size={20} color="#6B7280" />
+                  <Ionicons name="ellipsis-vertical" size={20} color={colors.textSecondary} />
                 </Pressable>
               </View>
             ))
@@ -213,18 +215,21 @@ export default function PaymentMethodsScreen() {
         </View>
 
         {/* Add New Card Button */}
-        <Pressable style={styles.addButton} onPress={() => setShowAddModal(true)}>
-          <Ionicons name="add-circle-outline" size={24} color="#2563EB" />
+        <Pressable 
+          style={[styles.addButton, { backgroundColor: colors.surface, borderColor: colors.border }]} 
+          onPress={() => setShowAddModal(true)}
+        >
+          <Ionicons name="add-circle-outline" size={24} color={colors.primary} />
           <Text style={styles.addButtonText}>Add New Card</Text>
         </Pressable>
 
         {/* Billing Address */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Billing Address</Text>
-          <View style={styles.addressCard}>
-            <Text style={styles.addressText}>{billingAddress.street}</Text>
-            <Text style={styles.addressText}>{billingAddress.city}</Text>
-            <Text style={styles.addressText}>{billingAddress.country}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Billing Address</Text>
+          <View style={[styles.addressCard, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.addressText, { color: colors.textSecondary }]}>{billingAddress.street}</Text>
+            <Text style={[styles.addressText, { color: colors.textSecondary }]}>{billingAddress.city}</Text>
+            <Text style={[styles.addressText, { color: colors.textSecondary }]}>{billingAddress.country}</Text>
             <Pressable style={styles.editLink} onPress={() => setShowEditAddressModal(true)}>
               <Text style={styles.editLinkText}>Edit Address</Text>
             </Pressable>
@@ -237,43 +242,53 @@ export default function PaymentMethodsScreen() {
       {/* Add Card Modal */}
       <Modal visible={showAddModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Card</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Add New Card</Text>
               <Pressable onPress={() => setShowAddModal(false)}>
-                <Ionicons name="close" size={24} color="#6B7280" />
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
             </View>
             
-            <Text style={styles.inputLabel}>Card Type</Text>
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Card Type</Text>
             <View style={styles.cardTypeRow}>
               {["Visa", "Mastercard", "Amex"].map((type) => (
                 <Pressable
                   key={type}
-                  style={[styles.cardTypeButton, cardType === type && styles.cardTypeButtonActive]}
+                  style={[
+                    styles.cardTypeButton, 
+                    { borderColor: colors.border },
+                    cardType === type && styles.cardTypeButtonActive
+                  ]}
                   onPress={() => setCardType(type)}
                 >
-                  <Text style={[styles.cardTypeText, cardType === type && styles.cardTypeTextActive]}>
+                  <Text style={[
+                    styles.cardTypeText, 
+                    { color: colors.text },
+                    cardType === type && styles.cardTypeTextActive
+                  ]}>
                     {type}
                   </Text>
                 </Pressable>
               ))}
             </View>
             
-            <Text style={styles.inputLabel}>Card Number</Text>
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Card Number</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
               placeholder="1234 5678 9012 3456"
+              placeholderTextColor={colors.textSecondary}
               value={cardNumber}
               onChangeText={setCardNumber}
               keyboardType="number-pad"
               maxLength={16}
             />
             
-            <Text style={styles.inputLabel}>Expiry Date</Text>
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Expiry Date</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
               placeholder="MM/YY"
+              placeholderTextColor={colors.textSecondary}
               value={expiryDate}
               onChangeText={setExpiryDate}
               maxLength={5}
@@ -297,31 +312,31 @@ export default function PaymentMethodsScreen() {
       {/* Edit Address Modal */}
       <Modal visible={showEditAddressModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Edit Billing Address</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Edit Billing Address</Text>
               <Pressable onPress={() => setShowEditAddressModal(false)}>
-                <Ionicons name="close" size={24} color="#6B7280" />
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
             </View>
             
-            <Text style={styles.inputLabel}>Street Address</Text>
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Street Address</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
               value={billingAddress.street}
               onChangeText={(text) => setBillingAddress({ ...billingAddress, street: text })}
             />
             
-            <Text style={styles.inputLabel}>City, State, ZIP</Text>
+            <Text style={[styles.inputLabel, { color: colors.text }]}>City, State, ZIP</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
               value={billingAddress.city}
               onChangeText={(text) => setBillingAddress({ ...billingAddress, city: text })}
             />
             
-            <Text style={styles.inputLabel}>Country</Text>
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Country</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
               value={billingAddress.country}
               onChangeText={(text) => setBillingAddress({ ...billingAddress, country: text })}
             />

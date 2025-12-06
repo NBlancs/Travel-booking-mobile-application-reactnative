@@ -2,113 +2,116 @@ import React from "react";
 import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function TermsScreen() {
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Terms of Service</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Terms of Service</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.documentContainer}>
-          <Text style={styles.lastUpdated}>Last updated: January 2024</Text>
+        <View style={[styles.documentContainer, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.lastUpdated, { color: colors.textSecondary }]}>Last updated: January 2024</Text>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>1. Acceptance of Terms</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>1. Acceptance of Terms</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               By accessing and using the TravelBooking mobile application, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use our application.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>2. Use License</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>2. Use License</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               Permission is granted to temporarily download one copy of the materials on TravelBooking's application for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title.
             </Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               Under this license you may not:
             </Text>
             <View style={styles.bulletList}>
-              <Text style={styles.bulletItem}>• Modify or copy the materials</Text>
-              <Text style={styles.bulletItem}>• Use the materials for any commercial purpose</Text>
-              <Text style={styles.bulletItem}>• Attempt to decompile or reverse engineer any software</Text>
-              <Text style={styles.bulletItem}>• Remove any copyright or proprietary notations</Text>
+              <Text style={[styles.bulletItem, { color: colors.textSecondary }]}>• Modify or copy the materials</Text>
+              <Text style={[styles.bulletItem, { color: colors.textSecondary }]}>• Use the materials for any commercial purpose</Text>
+              <Text style={[styles.bulletItem, { color: colors.textSecondary }]}>• Attempt to decompile or reverse engineer any software</Text>
+              <Text style={[styles.bulletItem, { color: colors.textSecondary }]}>• Remove any copyright or proprietary notations</Text>
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>3. Booking and Reservations</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>3. Booking and Reservations</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               All bookings made through our application are subject to availability and confirmation of the booking price. We reserve the right to refuse service, terminate accounts, or cancel bookings in our sole discretion.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>4. Payment Terms</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>4. Payment Terms</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               You agree to provide current, complete, and accurate purchase and account information for all bookings made via our application. Payment must be received by us before bookings are confirmed.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>5. Cancellation Policy</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>5. Cancellation Policy</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               Cancellation policies vary by property and are clearly stated during the booking process. Please review the specific cancellation policy before completing your reservation. Some bookings may be non-refundable.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>6. User Conduct</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>6. User Conduct</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               You agree not to use the application to:
             </Text>
             <View style={styles.bulletList}>
-              <Text style={styles.bulletItem}>• Violate any laws or regulations</Text>
-              <Text style={styles.bulletItem}>• Impersonate any person or entity</Text>
-              <Text style={styles.bulletItem}>• Interfere with the proper working of the application</Text>
-              <Text style={styles.bulletItem}>• Attempt to gain unauthorized access to any systems</Text>
+              <Text style={[styles.bulletItem, { color: colors.textSecondary }]}>• Violate any laws or regulations</Text>
+              <Text style={[styles.bulletItem, { color: colors.textSecondary }]}>• Impersonate any person or entity</Text>
+              <Text style={[styles.bulletItem, { color: colors.textSecondary }]}>• Interfere with the proper working of the application</Text>
+              <Text style={[styles.bulletItem, { color: colors.textSecondary }]}>• Attempt to gain unauthorized access to any systems</Text>
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>7. Limitation of Liability</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>7. Limitation of Liability</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               In no event shall TravelBooking or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on the application.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>8. Privacy</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>8. Privacy</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               Your use of the application is also governed by our Privacy Policy. Please review our Privacy Policy, which also governs the application and informs users of our data collection practices.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>9. Modifications to Terms</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>9. Modifications to Terms</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               We reserve the right to revise these terms of service at any time without notice. By using this application you are agreeing to be bound by the then current version of these Terms of Service.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>10. Contact Information</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>10. Contact Information</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               If you have any questions about these Terms of Service, please contact us at:
             </Text>
-            <Text style={styles.contactInfo}>Email: legal@travelapp.com</Text>
-            <Text style={styles.contactInfo}>Phone: +1 (555) 123-4567</Text>
+            <Text style={[styles.contactInfo, { color: colors.primary }]}>Email: legal@travelapp.com</Text>
+            <Text style={[styles.contactInfo, { color: colors.primary }]}>Phone: +1 (555) 123-4567</Text>
           </View>
 
-          <View style={styles.acceptanceBox}>
+          <View style={[styles.acceptanceBox, { backgroundColor: colors.background }]}>
             <Ionicons name="shield-checkmark" size={48} color="#10B981" />
-            <Text style={styles.acceptanceText}>
+            <Text style={[styles.acceptanceText, { color: colors.text }]}>
               By continuing to use TravelBooking, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
             </Text>
           </View>

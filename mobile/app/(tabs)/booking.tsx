@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable, Dimensions, TextInput, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
 import { destinations, Destination } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
@@ -9,6 +10,7 @@ const cardWidth = (width - 48) / 2; // Two cards per row with padding and gap
 const HEADER_HEIGHT = 95; // Height of the header section
 
 export default function BookingScreen() {
+  const { colors, isDark } = useTheme();
   const scrollY = useRef(new Animated.Value(0)).current;
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
@@ -150,12 +152,12 @@ export default function BookingScreen() {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ImageBackground
         source={require("../../assets/images/skyblue.jpg")}
         style={styles.backgroundImage}
         resizeMode="cover"
-        imageStyle={{ opacity: 0.25 }}
+        imageStyle={{ opacity: isDark ? 0.1 : 0.25 }}
       >
         {/* Sticky Search Bar */}
         <Animated.View 
@@ -164,18 +166,18 @@ export default function BookingScreen() {
             { transform: [{ translateY: searchBarTranslateY }] }
           ]}
         >
-          <View style={styles.searchContainer}>
-            <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
+          <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
+            <Ionicons name="search-outline" size={20} color={colors.textSecondary} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.text }]}
               placeholder="Search your place"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
             {searchQuery.length > 0 && (
               <Pressable onPress={() => setSearchQuery("")}>
-                <Ionicons name="close-circle" size={20} color="#999" />
+                <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
               </Pressable>
             )}
           </View>
@@ -191,8 +193,8 @@ export default function BookingScreen() {
           scrollEventThrottle={16}
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Book Your Next Adventure</Text>
-            <Text style={styles.subtitle}>Discover amazing destinations around the world</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Book Your Next Adventure</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Discover amazing destinations around the world</Text>
           </View>
 
           {/* Spacer for search bar */}
@@ -203,9 +205,9 @@ export default function BookingScreen() {
               filteredDestinations.map(renderDestinationCard)
             ) : (
               <View style={styles.noResultsContainer}>
-                <Ionicons name="search-outline" size={48} color="#9CA3AF" />
-                <Text style={styles.noResultsText}>No destinations found</Text>
-                <Text style={styles.noResultsSubtext}>Try a different search term</Text>
+                <Ionicons name="search-outline" size={48} color={colors.textSecondary} />
+                <Text style={[styles.noResultsText, { color: colors.text }]}>No destinations found</Text>
+                <Text style={[styles.noResultsSubtext, { color: colors.textSecondary }]}>Try a different search term</Text>
               </View>
             )}
           </View>

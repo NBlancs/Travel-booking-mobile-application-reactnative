@@ -5,94 +5,94 @@ import { router } from "expo-router";
 import { useTheme } from "../../context/ThemeContext";
 
 export default function DarkModeScreen() {
-  const { themeMode, setThemeMode, useAmoledBlack, setUseAmoledBlack, isDark } = useTheme();
+  const { themeMode, setThemeMode, useAmoledBlack, setUseAmoledBlack, isDark, colors } = useTheme();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Appearance</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Appearance</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.description}>
+        <Text style={[styles.description, { color: colors.textSecondary }]}>
           Customize how the app looks on your device
         </Text>
 
         {/* Theme Options */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Theme</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Theme</Text>
           
           <Pressable 
-            style={styles.themeOption}
+            style={[styles.themeOption, { backgroundColor: colors.surface }]}
             onPress={() => setThemeMode("light")}
           >
-            <View style={styles.themeIconContainer}>
+            <View style={[styles.themeIconContainer, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}>
               <Ionicons name="sunny" size={32} color="#F59E0B" />
             </View>
             <View style={styles.themeTextContainer}>
-              <Text style={styles.themeTitle}>Light Mode</Text>
-              <Text style={styles.themeDescription}>Classic bright appearance</Text>
+              <Text style={[styles.themeTitle, { color: colors.text }]}>Light Mode</Text>
+              <Text style={[styles.themeDescription, { color: colors.textSecondary }]}>Classic bright appearance</Text>
             </View>
             {themeMode === "light" && (
-              <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
+              <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
             )}
           </Pressable>
 
           <Pressable 
-            style={styles.themeOption}
+            style={[styles.themeOption, { backgroundColor: colors.surface }]}
             onPress={() => setThemeMode("dark")}
           >
-            <View style={styles.themeIconContainer}>
+            <View style={[styles.themeIconContainer, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}>
               <Ionicons name="moon" size={32} color="#6366F1" />
             </View>
             <View style={styles.themeTextContainer}>
-              <Text style={styles.themeTitle}>Dark Mode</Text>
-              <Text style={styles.themeDescription}>Easy on the eyes in low light</Text>
+              <Text style={[styles.themeTitle, { color: colors.text }]}>Dark Mode</Text>
+              <Text style={[styles.themeDescription, { color: colors.textSecondary }]}>Easy on the eyes in low light</Text>
             </View>
             {themeMode === "dark" && (
-              <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
+              <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
             )}
           </Pressable>
 
           <Pressable 
-            style={styles.themeOption}
+            style={[styles.themeOption, { backgroundColor: colors.surface }]}
             onPress={() => setThemeMode("auto")}
           >
-            <View style={styles.themeIconContainer}>
+            <View style={[styles.themeIconContainer, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}>
               <Ionicons name="contrast" size={32} color="#8B5CF6" />
             </View>
             <View style={styles.themeTextContainer}>
-              <Text style={styles.themeTitle}>Auto</Text>
-              <Text style={styles.themeDescription}>Matches system settings</Text>
+              <Text style={[styles.themeTitle, { color: colors.text }]}>Auto</Text>
+              <Text style={[styles.themeDescription, { color: colors.textSecondary }]}>Matches system settings</Text>
             </View>
             {themeMode === "auto" && (
-              <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
+              <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
             )}
           </Pressable>
         </View>
 
         {/* Additional Settings */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Display</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Display</Text>
           
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="color-palette-outline" size={20} color="#6B7280" />
+              <Ionicons name="color-palette-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Use AMOLED Black</Text>
-                <Text style={styles.menuItemSubtext}>Pure black for dark mode</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Use AMOLED Black</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Pure black for dark mode</Text>
               </View>
             </View>
             <Switch
               value={useAmoledBlack}
               onValueChange={setUseAmoledBlack}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={useAmoledBlack ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: "#93C5FD" }}
+              thumbColor={useAmoledBlack ? colors.primary : "#F3F4F6"}
               disabled={!isDark}
             />
           </View>

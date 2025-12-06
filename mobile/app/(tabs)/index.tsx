@@ -15,12 +15,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import { destinations, categories, extendedCategories } from "../../data/destinations";
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
+  const { colors, isDark } = useTheme();
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -103,12 +105,12 @@ export default function DashboardScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ImageBackground
         source={require("../../assets/images/skyblue.jpg")}
         style={styles.backgroundImage}
         resizeMode="cover"
-        imageStyle={{ opacity: 0.25 }}
+        imageStyle={{ opacity: isDark ? 0.1 : 0.25 }}
       >
         <ScrollView 
           style={styles.scrollView}
@@ -117,60 +119,60 @@ export default function DashboardScreen() {
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.locationContainer}>
-            <Pressable style={styles.locationButton}>
-              <Ionicons name="location-outline" size={24} color="#333" />
+            <Pressable style={[styles.locationButton, { backgroundColor: colors.surface }]}>
+              <Ionicons name="location-outline" size={24} color={colors.text} />
             </Pressable>
             <View>
-              <Text style={styles.locationLabel}>Location</Text>
+              <Text style={[styles.locationLabel, { color: colors.textSecondary }]}>Location</Text>
               <View style={styles.locationRow}>
-                <Text style={styles.locationText}>Bali, Indonesia</Text>
-                <Ionicons name="chevron-down" size={12} color="#666" />
+                <Text style={[styles.locationText, { color: colors.text }]}>Bali, Indonesia</Text>
+                <Ionicons name="chevron-down" size={12} color={colors.textSecondary} />
               </View>
             </View>
           </View>
-          <Pressable style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color="#333" />
+          <Pressable style={[styles.notificationButton, { backgroundColor: colors.surface }]}>
+            <Ionicons name="notifications-outline" size={24} color={colors.text} />
           </Pressable>
         </View>
 
         {/* Search Bar */}
         <View style={styles.searchWrapper}>
-          <View style={styles.searchContainer}>
-            <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
+          <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
+            <Ionicons name="search-outline" size={20} color={colors.textSecondary} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.text }]}
               placeholder="Search your place"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={searchQuery}
               onChangeText={handleSearchChange}
             />
             {searchQuery.length > 0 && (
               <Pressable onPress={() => { setSearchQuery(""); setShowSearchResults(false); }}>
-                <Ionicons name="close-circle" size={20} color="#999" />
+                <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
               </Pressable>
             )}
           </View>
           
           {/* Search Results Dropdown */}
           {showSearchResults && (
-            <View style={styles.searchResultsContainer}>
+            <View style={[styles.searchResultsContainer, { backgroundColor: colors.surface }]}>
               {filteredDestinations.length > 0 ? (
                 filteredDestinations.slice(0, 5).map((destination) => (
                   <Pressable
                     key={destination.id}
-                    style={styles.searchResultItem}
+                    style={[styles.searchResultItem, { borderBottomColor: colors.border }]}
                     onPress={() => handleSearchResultPress(destination.id)}
                   >
-                    <Ionicons name="location-outline" size={18} color="#666" />
+                    <Ionicons name="location-outline" size={18} color={colors.textSecondary} />
                     <View style={styles.searchResultText}>
-                      <Text style={styles.searchResultName}>{destination.name}</Text>
-                      <Text style={styles.searchResultLocation}>{destination.location}, {destination.country}</Text>
+                      <Text style={[styles.searchResultName, { color: colors.text }]}>{destination.name}</Text>
+                      <Text style={[styles.searchResultLocation, { color: colors.textSecondary }]}>{destination.location}, {destination.country}</Text>
                     </View>
                   </Pressable>
                 ))
               ) : (
                 <View style={styles.noResultsContainer}>
-                  <Text style={styles.noResultsText}>No places found</Text>
+                  <Text style={[styles.noResultsText, { color: colors.textSecondary }]}>No places found</Text>
                 </View>
               )}
             </View>
@@ -179,13 +181,14 @@ export default function DashboardScreen() {
 
         {/* Popular Place Category */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>    Popular Place Category</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>    Popular Place Category</Text>
           <View style={styles.categoriesContainer}>
             {categories.map((category) => (
               <Pressable 
                 key={category.id} 
                 style={({ pressed }) => [
                   styles.categoryCard,
+                  { backgroundColor: colors.surface },
                   pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] }
                 ]}
                 onPress={() => {
@@ -199,7 +202,7 @@ export default function DashboardScreen() {
                 }}
               >
                 <Text style={styles.categoryIcon}>{category.icon}</Text>
-                <Text style={styles.categoryName}>{category.name}</Text>
+                <Text style={[styles.categoryName, { color: colors.text }]}>{category.name}</Text>
               </Pressable>
             ))}
           </View>
@@ -208,9 +211,9 @@ export default function DashboardScreen() {
         {/* Explore the World */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Explore the World</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Explore the World</Text>
             <Pressable>
-              <Text style={styles.seeAllText}>See all</Text>
+              <Text style={[styles.seeAllText, { color: colors.textSecondary }]}>See all</Text>
             </Pressable>
           </View>
 
@@ -304,17 +307,17 @@ export default function DashboardScreen() {
           onPress={() => setIsModalVisible(false)}
         >
           <Pressable 
-            style={styles.modalContent}
+            style={[styles.modalContent, { backgroundColor: colors.surface }]}
             onPress={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>All Categories</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>All Categories</Text>
               <Pressable 
-                style={styles.closeButton}
+                style={[styles.closeButton, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}
                 onPress={() => setIsModalVisible(false)}
               >
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.text} />
               </Pressable>
             </View>
 
@@ -329,7 +332,8 @@ export default function DashboardScreen() {
                     key={category.id} 
                     style={({ pressed }) => [
                       styles.modalCategoryCard,
-                      pressed && { backgroundColor: "#F3F4F6", transform: [{ scale: 0.98 }] }
+                      { backgroundColor: colors.surface, borderColor: colors.border },
+                      pressed && { backgroundColor: isDark ? colors.background : "#F3F4F6", transform: [{ scale: 0.98 }] }
                     ]}
                     onPress={() => {
                       setIsModalVisible(false);
@@ -338,7 +342,7 @@ export default function DashboardScreen() {
                     }}
                   >
                     <Text style={styles.modalCategoryIcon}>{category.icon}</Text>
-                    <Text style={styles.modalCategoryName}>{category.name}</Text>
+                    <Text style={[styles.modalCategoryName, { color: colors.text }]}>{category.name}</Text>
                   </Pressable>
                 ))}
               </View>

@@ -2,136 +2,138 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, ScrollView, Pressable, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function PrivacySecurityScreen() {
+  const { colors } = useTheme();
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [biometric, setBiometric] = useState(true);
   const [loginAlerts, setLoginAlerts] = useState(true);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Privacy & Security</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Privacy & Security</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Password Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Password</Text>
-          <Pressable style={styles.menuItem}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Password</Text>
+          <Pressable style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="key-outline" size={20} color="#6B7280" />
-              <Text style={styles.menuItemText}>Change Password</Text>
+              <Ionicons name="key-outline" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.text }]}>Change Password</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
         {/* Security Options */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Security Options</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Security Options</Text>
           
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#6B7280" />
+              <Ionicons name="shield-checkmark-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Two-Factor Authentication</Text>
-                <Text style={styles.menuItemSubtext}>Add extra security layer</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Two-Factor Authentication</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Add extra security layer</Text>
               </View>
             </View>
             <Switch
               value={twoFactorAuth}
               onValueChange={setTwoFactorAuth}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={twoFactorAuth ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={twoFactorAuth ? "#FFFFFF" : "#F4F3F4"}
             />
           </View>
 
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="finger-print-outline" size={20} color="#6B7280" />
+              <Ionicons name="finger-print-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Biometric Login</Text>
-                <Text style={styles.menuItemSubtext}>Use fingerprint or face ID</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Biometric Login</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Use fingerprint or face ID</Text>
               </View>
             </View>
             <Switch
               value={biometric}
               onValueChange={setBiometric}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={biometric ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={biometric ? "#FFFFFF" : "#F4F3F4"}
             />
           </View>
 
-          <View style={styles.menuItem}>
+          <View style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="mail-outline" size={20} color="#6B7280" />
+              <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Login Alerts</Text>
-                <Text style={styles.menuItemSubtext}>Get notified of new logins</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Login Alerts</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>Get notified of new logins</Text>
               </View>
             </View>
             <Switch
               value={loginAlerts}
               onValueChange={setLoginAlerts}
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={loginAlerts ? "#2563EB" : "#F3F4F6"}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={loginAlerts ? "#FFFFFF" : "#F4F3F4"}
             />
           </View>
         </View>
 
         {/* Privacy Settings */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Privacy</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Privacy</Text>
           
-          <Pressable style={styles.menuItem}>
+          <Pressable style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="eye-outline" size={20} color="#6B7280" />
-              <Text style={styles.menuItemText}>Profile Visibility</Text>
+              <Ionicons name="eye-outline" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.text }]}>Profile Visibility</Text>
             </View>
             <View style={styles.menuItemRight}>
-              <Text style={styles.valueText}>Public</Text>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              <Text style={[styles.valueText, { color: colors.textSecondary }]}>Public</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
             </View>
           </Pressable>
 
-          <Pressable style={styles.menuItem}>
+          <Pressable style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="location-outline" size={20} color="#6B7280" />
-              <Text style={styles.menuItemText}>Location Services</Text>
+              <Ionicons name="location-outline" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.text }]}>Location Services</Text>
             </View>
             <View style={styles.menuItemRight}>
-              <Text style={styles.valueText}>Enabled</Text>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              <Text style={[styles.valueText, { color: colors.textSecondary }]}>Enabled</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
             </View>
           </Pressable>
 
-          <Pressable style={styles.menuItem}>
+          <Pressable style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="analytics-outline" size={20} color="#6B7280" />
-              <Text style={styles.menuItemText}>Data & Analytics</Text>
+              <Ionicons name="analytics-outline" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.text }]}>Data & Analytics</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
         {/* Active Sessions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Active Sessions</Text>
-          <Pressable style={styles.menuItem}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Active Sessions</Text>
+          <Pressable style={[styles.menuItem, { backgroundColor: colors.surface }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="desktop-outline" size={20} color="#6B7280" />
+              <Ionicons name="desktop-outline" size={20} color={colors.textSecondary} />
               <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemText}>Manage Devices</Text>
-                <Text style={styles.menuItemSubtext}>3 active sessions</Text>
+                <Text style={[styles.menuItemText, { color: colors.text }]}>Manage Devices</Text>
+                <Text style={[styles.menuItemSubtext, { color: colors.textSecondary }]}>3 active sessions</Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 

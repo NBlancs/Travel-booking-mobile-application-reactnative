@@ -4,11 +4,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { userApi, settingsStorage } from "../../lib/api";
+import { useTheme } from "../../context/ThemeContext";
 
 const PROFILE_STORAGE_KEY = "profile_data";
 
 export default function ProfileInformationScreen() {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -75,26 +77,26 @@ export default function ProfileInformationScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
+      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#2563EB" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Profile Information</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Profile Information</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Avatar Section */}
-        <View style={styles.avatarSection}>
+        <View style={[styles.avatarSection, { backgroundColor: colors.surface }]}>
           <View style={styles.avatar}>
             <Ionicons name="person" size={48} color="#FFFFFF" />
           </View>
@@ -104,39 +106,43 @@ export default function ProfileInformationScreen() {
         </View>
 
         {/* Form Fields */}
-        <View style={styles.formSection}>
-          <Text style={styles.label}>Full Name</Text>
+        <View style={[styles.formSection, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.label, { color: colors.text }]}>Full Name</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
             value={name}
             onChangeText={setName}
             placeholder="Enter your full name"
+            placeholderTextColor={colors.textSecondary}
           />
 
-          <Text style={styles.label}>Email Address</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Email Address</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
             value={email}
             onChangeText={setEmail}
             placeholder="Enter your email"
+            placeholderTextColor={colors.textSecondary}
             keyboardType="email-address"
           />
 
-          <Text style={styles.label}>Phone Number</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Phone Number</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
             value={phone}
             onChangeText={setPhone}
             placeholder="Enter your phone number"
+            placeholderTextColor={colors.textSecondary}
             keyboardType="phone-pad"
           />
 
-          <Text style={styles.label}>Address</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Address</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[styles.input, styles.textArea, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
             value={address}
             onChangeText={setAddress}
             placeholder="Enter your address"
+            placeholderTextColor={colors.textSecondary}
             multiline
             numberOfLines={3}
           />

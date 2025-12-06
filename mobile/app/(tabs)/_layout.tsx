@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
 import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { useBooking } from "../../context/BookingContext";
+import { useTheme } from "../../context/ThemeContext";
 
 const TabBarButton = React.forwardRef<any, BottomTabBarButtonProps>(({ children, ...props }, ref) => {
   return (
@@ -20,13 +21,15 @@ TabBarButton.displayName = "TabBarButton";
 
 export default function TabsLayout() {
   const { hasNewBooking } = useBooking();
+  const { colors } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarButton: (p) => <TabBarButton {...p} />,
-        tabBarActiveTintColor: "#2563EB",
-        tabBarInactiveTintColor: "#6B7280",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
@@ -34,7 +37,7 @@ export default function TabsLayout() {
           left: 50,
           right: 50,
           elevation: 8,
-          backgroundColor: "#FFFFFF",
+          backgroundColor: colors.surface,
           borderRadius: 30,
           height: 70,
           paddingBottom: 0,
@@ -62,7 +65,7 @@ export default function TabsLayout() {
               width: 48,
               height: 48,
               borderRadius: 24,
-              backgroundColor: focused ? "#2563EB" : "transparent",
+              backgroundColor: focused ? colors.primary : "transparent",
               justifyContent: "center",
               alignItems: "center",
             }}>
@@ -80,7 +83,7 @@ export default function TabsLayout() {
                 width: 48,
                 height: 48,
                 borderRadius: 24,
-                backgroundColor: focused ? "#2563EB" : "transparent",
+                backgroundColor: focused ? colors.primary : "transparent",
                 justifyContent: "center",
                 alignItems: "center",
               }}>
@@ -98,7 +101,7 @@ export default function TabsLayout() {
               width: 48,
               height: 48,
               borderRadius: 24,
-              backgroundColor: focused ? "#2563EB" : "transparent",
+              backgroundColor: focused ? colors.primary : "transparent",
               justifyContent: "center",
               alignItems: "center",
             }}>
@@ -111,9 +114,9 @@ export default function TabsLayout() {
                   width: 12,
                   height: 12,
                   borderRadius: 6,
-                  backgroundColor: "#EF4444",
+                  backgroundColor: colors.error,
                   borderWidth: 2,
-                  borderColor: "#FFFFFF",
+                  borderColor: colors.surface,
                 }} />
               )}
             </View>
@@ -129,7 +132,7 @@ export default function TabsLayout() {
               width: 48,
               height: 48,
               borderRadius: 24,
-              backgroundColor: focused ? "#2563EB" : "transparent",
+              backgroundColor: focused ? colors.primary : "transparent",
               justifyContent: "center",
               alignItems: "center",
             }}>
