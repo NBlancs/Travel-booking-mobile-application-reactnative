@@ -12,9 +12,17 @@ export default function BookingScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(1)).current;
   const heartTranslateY = useRef(new Animated.Value(0)).current;
+
+  // Filter destinations based on search query
+  const filteredDestinations = destinations.filter((destination) => 
+    destination.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    destination.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    destination.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const toggleFavorite = (id: number) => {
     const isCurrentlyFavorited = favorites.has(id);
@@ -162,7 +170,14 @@ export default function BookingScreen() {
               style={styles.searchInput}
               placeholder="Search your place"
               placeholderTextColor="#999"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery("")}>
+                <Ionicons name="close-circle" size={20} color="#999" />
+              </Pressable>
+            )}
           </View>
         </Animated.View>
 
@@ -184,7 +199,15 @@ export default function BookingScreen() {
           <View style={styles.searchSpacer} />
 
           <View style={styles.grid}>
-            {destinations.map(renderDestinationCard)}
+            {filteredDestinations.length > 0 ? (
+              filteredDestinations.map(renderDestinationCard)
+            ) : (
+              <View style={styles.noResultsContainer}>
+                <Ionicons name="search-outline" size={48} color="#9CA3AF" />
+                <Text style={styles.noResultsText}>No destinations found</Text>
+                <Text style={styles.noResultsSubtext}>Try a different search term</Text>
+              </View>
+            )}
           </View>
 
           {/* Bottom spacing for tab bar */}
@@ -355,5 +378,23 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 100,
+  },
+  noResultsContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  noResultsText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#4B5563",
+    marginTop: 16,
+  },
+  noResultsSubtext: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    marginTop: 4,
   },
 });

@@ -6,16 +6,20 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState("user@example.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
     try {
       setLoading(true);
-  await signIn(email, password);
-  router.replace("/(tabs)");
+      await signIn(email, password);
+      router.replace("/(tabs)");
     } catch (e: any) {
       Alert.alert("Login failed", e?.message ?? "Please try again.");
     } finally {

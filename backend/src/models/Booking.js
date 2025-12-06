@@ -7,9 +7,18 @@ const bookingSchema = new mongoose.Schema({
         required: true,
     },
 
-    destination: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Destination",
+    destinationId: {
+        type: Number,
+        required: true
+    },
+
+    destinationName: {
+        type: String,
+        required: true
+    },
+
+    destinationCountry: {
+        type: String,
         required: true
     },
 
@@ -50,7 +59,7 @@ const bookingSchema = new mongoose.Schema({
         type: String,
         default: ""
     }
-}, { timestamp: true});
+}, { timestamps: true });
 
 const Booking = mongoose.model("Booking", bookingSchema);
 

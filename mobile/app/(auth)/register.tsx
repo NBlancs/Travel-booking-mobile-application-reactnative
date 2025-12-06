@@ -8,15 +8,28 @@ import { ImageBackground } from "expo-image";
 export default function RegisterScreen() {
   const { signUp } = useAuth();
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async () => {
+    if (!email || !username || !password) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+    if (username.length < 6) {
+      Alert.alert("Error", "Username must be at least 6 characters.");
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters.");
+      return;
+    }
     try {
       setLoading(true);
-  await signUp(email, password);
-  router.replace("/(tabs)");
+      await signUp(email, username, password);
+      router.replace("/(tabs)");
     } catch (e: any) {
       Alert.alert("Registration failed", e?.message ?? "Please try again.");
     } finally {
@@ -44,6 +57,13 @@ export default function RegisterScreen() {
           placeholder="Email"
           autoCapitalize="none"
           keyboardType="email-address"
+          style={styles.input}
+        />
+        <TextInput
+          value={username}
+          onChangeText={setUsername}
+          placeholder="Username (min 6 characters)"
+          autoCapitalize="none"
           style={styles.input}
         />
         <View style={styles.passwordContainer}>

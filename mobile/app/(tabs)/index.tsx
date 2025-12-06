@@ -24,9 +24,29 @@ export default function DashboardScreen() {
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(1)).current;
   const heartTranslateY = useRef(new Animated.Value(0)).current;
+
+  // Filter destinations based on search query
+  const filteredDestinations = destinations.filter((destination) => 
+    destination.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    destination.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    destination.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSearchChange = (text: string) => {
+    setSearchQuery(text);
+    setShowSearchResults(text.length > 0);
+  };
+
+  const handleSearchResultPress = (destinationId: number) => {
+    setSearchQuery("");
+    setShowSearchResults(false);
+    router.push(`/property-details?id=${destinationId}`);
+  };
 
   const toggleFavorite = (id: number) => {
     const isCurrentlyFavorited = favorites.has(id);
@@ -114,13 +134,47 @@ export default function DashboardScreen() {
         </View>
 
         {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search your place"
-            placeholderTextColor="#999"
-          />
+        <View style={styles.searchWrapper}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search your place"
+              placeholderTextColor="#999"
+              value={searchQuery}
+              onChangeText={handleSearchChange}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => { setSearchQuery(""); setShowSearchResults(false); }}>
+                <Ionicons name="close-circle" size={20} color="#999" />
+              </Pressable>
+            )}
+          </View>
+          
+          {/* Search Results Dropdown */}
+          {showSearchResults && (
+            <View style={styles.searchResultsContainer}>
+              {filteredDestinations.length > 0 ? (
+                filteredDestinations.slice(0, 5).map((destination) => (
+                  <Pressable
+                    key={destination.id}
+                    style={styles.searchResultItem}
+                    onPress={() => handleSearchResultPress(destination.id)}
+                  >
+                    <Ionicons name="location-outline" size={18} color="#666" />
+                    <View style={styles.searchResultText}>
+                      <Text style={styles.searchResultName}>{destination.name}</Text>
+                      <Text style={styles.searchResultLocation}>{destination.location}, {destination.country}</Text>
+                    </View>
+                  </Pressable>
+                ))
+              ) : (
+                <View style={styles.noResultsContainer}>
+                  <Text style={styles.noResultsText}>No places found</Text>
+                </View>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Popular Place Category */}
@@ -364,12 +418,15 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  searchWrapper: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    zIndex: 100,
+  },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFF",
-    marginHorizontal: 20,
-    marginBottom: 24,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 50,
@@ -386,6 +443,51 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: "#333",
+  },
+  searchResultsContainer: {
+    position: "absolute",
+    top: 60,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+    maxHeight: 250,
+    overflow: "hidden",
+  },
+  searchResultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  searchResultText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  searchResultName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1F2937",
+  },
+  searchResultLocation: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  noResultsContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  noResultsText: {
+    fontSize: 14,
+    color: "#6B7280",
   },
   section: {
     marginBottom: 22,
