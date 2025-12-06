@@ -1,38 +1,86 @@
-import React from "react";
-import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable } from "react-native";
+import React, { useEffect, useMemo } from "react";
+import { StyleSheet, Text, View, ScrollView, ImageBackground, Pressable, ActivityIndicator, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useBooking } from "../../context/BookingContext";
+import { destinations, Destination } from "../../data/destinations";
+import { Booking } from "../../lib/api";
 
-const upcomingTrips = [
-  {
-    id: 1,
-    destination: "Osaka, Japan",
-    image: require("../../assets/images/osaka.jpg"),
-    dates: "Mar 15 - Mar 22, 2025",
-    status: "Confirmed",
-    days: "7 days"
-  },
-  {
-    id: 2,
-    destination: "Kuala Lumpur, Malaysia",
-    image: require("../../assets/images/kuala_lumpur.jpg"),
-    dates: "Apr 10 - Apr 17, 2025",
-    status: "Pending",
-    days: "8 days"
-  }
-];
+// Get destination image by destinationId
+const getDestinationImage = (destinationId: number): any => {
+  const destination = destinations.find((d) => d.id === destinationId);
+  return destination?.image || require("../../assets/images/osaka.jpg");
+};
 
-const todaySchedule = [
-  { time: "09:00", activity: "Flight to Santorini", type: "flight" },
-  { time: "14:30", activity: "Hotel Check-in", type: "hotel" },
-  { time: "16:00", activity: "Sunset Tour", type: "activity" },
-  { time: "19:30", activity: "Dinner Reservation", type: "dining" }
-];
+// Format date for display
+const formatDateRange = (checkIn: string, checkOut: string): string => {
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+  return `${checkInDate.toLocaleDateString("en-US", options)} - ${checkOutDate.toLocaleDateString("en-US", options)}`;
+};
+
+// Calculate days between dates
+const calculateDays = (checkIn: string, checkOut: string): string => {
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+};
 
 export default function ScheduleScreen() {
-  const renderTripCard = (trip: typeof upcomingTrips[0]) => (
-    <View key={trip.id} style={styles.tripCard}>
+  const { bookings, isLoading, fetchBookings, clearNewBookingFlag } = useBooking();
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  // Fetch bookings on mount and clear notification
+  useEffect(() => {
+    fetchBookings();
+    clearNewBookingFlag();
+  }, []);
+
+  // Pull to refresh handler
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await fetchBookings();
+    setRefreshing(false);
+  }, [fetchBookings]);
+
+  // Get upcoming bookings (not cancelled or completed)
+  const upcomingBookings = useMemo(() => {
+    return bookings.filter((b) => b.status !== "cancelled" && b.status !== "completed");
+  }, [bookings]);
+
+  // Generate today's schedule from the nearest booking
+  const todaySchedule = useMemo(() => {
+    if (upcomingBookings.length === 0) return [];
+    
+    const nearestBooking = upcomingBookings[0];
+    const checkInDate = new Date(nearestBooking.checkInDate);
+    const today = new Date();
+    
+    // If check-in is today, show check-in schedule
+    if (checkInDate.toDateString() === today.toDateString()) {
+      return [
+        { time: "09:00", activity: `Flight to ${nearestBooking.destinationName}`, type: "flight" },
+        { time: "14:30", activity: "Hotel Check-in", type: "hotel" },
+        { time: "16:00", activity: "City Tour", type: "activity" },
+        { time: "19:30", activity: "Welcome Dinner", type: "dining" },
+      ];
+    }
+    
+    // Default schedule
+    return [
+      { time: "09:00", activity: `Explore ${nearestBooking.destinationName}`, type: "activity" },
+      { time: "12:00", activity: "Lunch", type: "dining" },
+      { time: "15:00", activity: "Sightseeing", type: "activity" },
+      { time: "19:00", activity: "Dinner", type: "dining" },
+    ];
+  }, [upcomingBookings]);
+
+  const renderTripCard = (booking: Booking) => (
+    <View key={booking._id} style={styles.tripCard}>
       <ImageBackground
-        source={trip.image}
+        source={getDestinationImage(booking.destinationId)}
         style={styles.tripImage}
         imageStyle={{ borderRadius: 12 }}
         resizeMode="cover"
@@ -40,20 +88,21 @@ export default function ScheduleScreen() {
         {/* Top overlay - Days badge */}
         <View style={styles.topOverlay}>
           <View style={styles.daysTag}>
-            <Text style={styles.tripDays}>{trip.days}</Text>
+            <Text style={styles.tripDays}>{calculateDays(booking.checkInDate, booking.checkOutDate)}</Text>
           </View>
         </View>
 
         {/* Bottom overlay - Trip info */}
         <View style={styles.bottomOverlay}>
-          <Text style={styles.tripDestination}>{trip.destination}</Text>
-          <Text style={styles.tripDates}>{trip.dates}</Text>
+          <Text style={styles.tripDestination}>{booking.destinationName}, {booking.destinationCountry}</Text>
+          <Text style={styles.tripDates}>{formatDateRange(booking.checkInDate, booking.checkOutDate)}</Text>
           <View style={styles.tripFooter}>
+            <Text style={styles.tripGuests}>{booking.guests} guest{booking.guests > 1 ? 's' : ''}</Text>
             <View style={[styles.statusBadge, 
-              trip.status === "Confirmed" ? styles.confirmedBadge : styles.pendingBadge]}>
+              booking.status === "confirmed" ? styles.confirmedBadge : styles.pendingBadge]}>
               <Text style={[styles.statusText,
-                trip.status === "Confirmed" ? styles.confirmedText : styles.pendingText]}>
-                {trip.status}
+                booking.status === "confirmed" ? styles.confirmedText : styles.pendingText]}>
+                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
               </Text>
             </View>
           </View>
@@ -62,7 +111,7 @@ export default function ScheduleScreen() {
     </View>
   );
 
-  const renderScheduleItem = (item: typeof todaySchedule[0], index: number) => (
+  const renderScheduleItem = (item: { time: string; activity: string; type: string }, index: number) => (
     <View key={index} style={styles.scheduleItem}>
       <Text style={styles.scheduleTime}>{item.time}</Text>
       <View style={styles.scheduleContent}>
@@ -80,19 +129,49 @@ export default function ScheduleScreen() {
         resizeMode="cover"
         imageStyle={{ opacity: 0.25 }}
       >
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.scrollView} 
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {/* Loading State */}
+          {isLoading && !refreshing && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#2563EB" />
+              <Text style={styles.loadingText}>Loading your trips...</Text>
+            </View>
+          )}
+
+          {/* Upcoming Trips Section */}
           <View style={styles.section}>
-            {/* <Text style={styles.sectionTitle}>Upcoming Trips</Text> */}
-            {upcomingTrips.map(renderTripCard)}
+            <Text style={styles.sectionTitle}>Upcoming Trips</Text>
+            {upcomingBookings.length > 0 ? (
+              upcomingBookings.map(renderTripCard)
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="airplane-outline" size={48} color="#9CA3AF" />
+                <Text style={styles.emptyStateTitle}>No upcoming trips</Text>
+                <Text style={styles.emptyStateText}>
+                  Start planning your next adventure by booking a destination!
+                </Text>
+              </View>
+            )}
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Today's Schedule</Text>
-            <View style={styles.scheduleCard}>
-              <Text style={styles.scheduleDate}>March 15, 2025</Text>
-              {todaySchedule.map(renderScheduleItem)}
+          {/* Today's Schedule Section */}
+          {todaySchedule.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Today's Schedule</Text>
+              <View style={styles.scheduleCard}>
+                <Text style={styles.scheduleDate}>
+                  {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                </Text>
+                {todaySchedule.map(renderScheduleItem)}
+              </View>
             </View>
-          </View>
+          )}
 
           {/* Bottom spacing for tab bar */}
           <View style={styles.bottomSpacing} />
@@ -125,6 +204,40 @@ const styles = StyleSheet.create({
     color: "#1F2937",
     marginBottom: 16 
   },
+  // Loading State
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  // Empty State
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 32,
+    marginBottom: 12,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  // Trip Card
   tripCard: {
     borderRadius: 12,
     marginBottom: 12,
@@ -151,7 +264,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
-    backdropFilter: "blur(10px)",
   },
   tripDays: {
     fontSize: 12,
@@ -162,7 +274,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     padding: 16,
     paddingTop: 12,
-    backdropFilter: "blur(10px)",
   },
   tripDestination: {
     fontSize: 16,
@@ -178,8 +289,13 @@ const styles = StyleSheet.create({
   },
   tripFooter: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "center",
+  },
+  tripGuests: {
+    fontSize: 13,
+    color: "#FFF",
+    opacity: 0.9,
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -202,6 +318,7 @@ const styles = StyleSheet.create({
   pendingText: {
     color: "#92400E",
   },
+  // Schedule Card
   scheduleCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,

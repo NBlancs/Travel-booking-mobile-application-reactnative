@@ -1,10 +1,16 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "../context/AuthContext";
+import { BookingProvider } from "../context/BookingContext";
+import { ThemeProvider } from "../context/ThemeContext";
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BookingProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </BookingProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

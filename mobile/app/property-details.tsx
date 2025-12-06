@@ -8,10 +8,17 @@ import {
   Image,
   Dimensions,
   StatusBar,
+  Modal,
+  Alert,
+  ActivityIndicator,
+  Platform,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { destinations } from "../data/destinations";
+import { bookingsApi, CreateBookingData } from "../lib/api";
+import { useBooking } from "../context/BookingContext";
 
 const { width, height } = Dimensions.get("window");
 
@@ -19,6 +26,22 @@ export default function PropertyDetailsScreen() {
   const { id } = useLocalSearchParams();
   const destination = destinations.find((d) => d.id === Number(id));
   const [isFavorite, setIsFavorite] = useState(false);
+  
+  // Booking Modal State
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [checkInDate, setCheckInDate] = useState(new Date());
+  const [checkOutDate, setCheckOutDate] = useState(new Date(Date.now() + 86400000)); // Tomorrow
+  const [guests, setGuests] = useState(1);
+  const [showCheckInPicker, setShowCheckInPicker] = useState(false);
+  const [showCheckOutPicker, setShowCheckOutPicker] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
+  
+  // Access booking context for notifications
+  const { addBooking } = useBooking();
+
+  // Calculate number of nights and total price
+  const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / 86400000));
+  const totalPrice = destination ? destination.price * nights : 0;
 
   if (!destination) {
     return (
@@ -36,6 +59,76 @@ export default function PropertyDetailsScreen() {
     bathrooms: "4 bath",
     address: getAddress(destination),
     description: getDescription(destination),
+  };
+
+  // Handle booking submission
+  const handleBookNow = async () => {
+    if (!destination) return;
+    
+    setIsBooking(true);
+    try {
+      const bookingData: CreateBookingData = {
+        destinationId: destination.id,
+        destinationName: destination.name,
+        destinationCountry: destination.country,
+        checkInDate: checkInDate.toISOString(),
+        checkOutDate: checkOutDate.toISOString(),
+        guests: guests,
+        totalPrice: totalPrice,
+      };
+      
+      const response = await bookingsApi.create(bookingData);
+      
+      // Add to booking context for notification badge
+      addBooking(response.booking);
+      
+      setShowBookingModal(false);
+      Alert.alert(
+        "Booking Confirmed! 🎉",
+        `Your trip to ${destination.name} has been booked!\n\nCheck-in: ${formatDate(checkInDate)}\nCheck-out: ${formatDate(checkOutDate)}\nGuests: ${guests}\nTotal: ₱${totalPrice.toLocaleString()}`,
+        [
+          {
+            text: "View Schedule",
+            onPress: () => router.push("/(tabs)/schedule"),
+          },
+          { text: "OK" },
+        ]
+      );
+    } catch (error: any) {
+      Alert.alert("Booking Failed", error.message || "Unable to complete booking. Please try again.");
+    } finally {
+      setIsBooking(false);
+    }
+  };
+
+  // Format date for display
+  const formatDate = (date: Date): string => {
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Format date with day name for picker
+  const formatDateLong = (date: Date): string => {
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Generate array of dates starting from a given date
+  const generateDateOptions = (startDate: Date, days: number): Date[] => {
+    const dates: Date[] = [];
+    for (let i = 0; i < days; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      dates.push(date);
+    }
+    return dates;
   };
 
   return (
@@ -134,10 +227,191 @@ export default function PropertyDetailsScreen() {
           <Text style={styles.priceAmount}>{destination.priceFormatted}</Text>
           <Text style={styles.priceLabel}>/night</Text>
         </View>
-        <Pressable style={styles.bookButton}>
+        <Pressable style={styles.bookButton} onPress={() => setShowBookingModal(true)}>
           <Text style={styles.bookButtonText}>Book Now</Text>
         </Pressable>
       </View>
+
+      {/* Booking Modal */}
+      <Modal
+        visible={showBookingModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowBookingModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Book Your Stay</Text>
+              <Pressable onPress={() => setShowBookingModal(false)} style={styles.modalCloseButton}>
+                <Ionicons name="close" size={24} color="#6B7280" />
+              </Pressable>
+            </View>
+
+            {/* Destination Info */}
+            <View style={styles.modalDestination}>
+              <Text style={styles.modalDestinationName}>{destination.name}</Text>
+              <Text style={styles.modalDestinationCountry}>{destination.country}</Text>
+            </View>
+
+            {/* Date Selection */}
+            <View style={styles.dateSection}>
+              <Text style={styles.sectionLabel}>Select Dates</Text>
+              <View style={styles.dateRow}>
+                <Pressable 
+                  style={styles.dateButton} 
+                  onPress={() => setShowCheckInPicker(true)}
+                >
+                  <Text style={styles.dateLabel}>Check-in</Text>
+                  <Text style={styles.dateValue}>{formatDate(checkInDate)}</Text>
+                </Pressable>
+                <Ionicons name="arrow-forward" size={20} color="#9CA3AF" />
+                <Pressable 
+                  style={styles.dateButton} 
+                  onPress={() => setShowCheckOutPicker(true)}
+                >
+                  <Text style={styles.dateLabel}>Check-out</Text>
+                  <Text style={styles.dateValue}>{formatDate(checkOutDate)}</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Custom Date Picker Modal for Check-in */}
+            <Modal
+              visible={showCheckInPicker}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setShowCheckInPicker(false)}
+            >
+              <Pressable style={styles.datePickerOverlay} onPress={() => setShowCheckInPicker(false)}>
+                <View style={styles.datePickerContent}>
+                  <Text style={styles.datePickerTitle}>Select Check-in Date</Text>
+                  <ScrollView style={styles.datePickerScroll} showsVerticalScrollIndicator={false}>
+                    {generateDateOptions(new Date(), 90).map((date) => (
+                      <Pressable
+                        key={date.toISOString()}
+                        style={[
+                          styles.datePickerOption,
+                          checkInDate.toDateString() === date.toDateString() && styles.datePickerOptionSelected
+                        ]}
+                        onPress={() => {
+                          setCheckInDate(date);
+                          if (date >= checkOutDate) {
+                            setCheckOutDate(new Date(date.getTime() + 86400000));
+                          }
+                          setShowCheckInPicker(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.datePickerOptionText,
+                          checkInDate.toDateString() === date.toDateString() && styles.datePickerOptionTextSelected
+                        ]}>
+                          {formatDateLong(date)}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                  <Pressable style={styles.datePickerClose} onPress={() => setShowCheckInPicker(false)}>
+                    <Text style={styles.datePickerCloseText}>Cancel</Text>
+                  </Pressable>
+                </View>
+              </Pressable>
+            </Modal>
+
+            {/* Custom Date Picker Modal for Check-out */}
+            <Modal
+              visible={showCheckOutPicker}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setShowCheckOutPicker(false)}
+            >
+              <Pressable style={styles.datePickerOverlay} onPress={() => setShowCheckOutPicker(false)}>
+                <View style={styles.datePickerContent}>
+                  <Text style={styles.datePickerTitle}>Select Check-out Date</Text>
+                  <ScrollView style={styles.datePickerScroll} showsVerticalScrollIndicator={false}>
+                    {generateDateOptions(new Date(checkInDate.getTime() + 86400000), 90).map((date) => (
+                      <Pressable
+                        key={date.toISOString()}
+                        style={[
+                          styles.datePickerOption,
+                          checkOutDate.toDateString() === date.toDateString() && styles.datePickerOptionSelected
+                        ]}
+                        onPress={() => {
+                          setCheckOutDate(date);
+                          setShowCheckOutPicker(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.datePickerOptionText,
+                          checkOutDate.toDateString() === date.toDateString() && styles.datePickerOptionTextSelected
+                        ]}>
+                          {formatDateLong(date)}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                  <Pressable style={styles.datePickerClose} onPress={() => setShowCheckOutPicker(false)}>
+                    <Text style={styles.datePickerCloseText}>Cancel</Text>
+                  </Pressable>
+                </View>
+              </Pressable>
+            </Modal>
+
+            {/* Guest Counter */}
+            <View style={styles.guestSection}>
+              <Text style={styles.sectionLabel}>Guests</Text>
+              <View style={styles.guestCounter}>
+                <Pressable 
+                  style={[styles.counterButton, guests <= 1 && styles.counterButtonDisabled]}
+                  onPress={() => setGuests(Math.max(1, guests - 1))}
+                  disabled={guests <= 1}
+                >
+                  <Ionicons name="remove" size={20} color={guests <= 1 ? "#D1D5DB" : "#2563EB"} />
+                </Pressable>
+                <Text style={styles.guestCount}>{guests}</Text>
+                <Pressable 
+                  style={[styles.counterButton, guests >= 10 && styles.counterButtonDisabled]}
+                  onPress={() => setGuests(Math.min(10, guests + 1))}
+                  disabled={guests >= 10}
+                >
+                  <Ionicons name="add" size={20} color={guests >= 10 ? "#D1D5DB" : "#2563EB"} />
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Price Summary */}
+            <View style={styles.priceSummary}>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceLabel2}>{destination.priceFormatted} × {nights} night{nights > 1 ? 's' : ''}</Text>
+                <Text style={styles.priceValue}>₱{(destination.price * nights).toLocaleString()}</Text>
+              </View>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceLabel2}>Service fee</Text>
+                <Text style={styles.priceValue}>₱0</Text>
+              </View>
+              <View style={styles.priceDivider} />
+              <View style={styles.priceRow}>
+                <Text style={styles.totalLabel}>Total</Text>
+                <Text style={styles.totalValue}>₱{totalPrice.toLocaleString()}</Text>
+              </View>
+            </View>
+
+            {/* Confirm Button */}
+            <Pressable 
+              style={[styles.confirmButton, isBooking && styles.confirmButtonDisabled]} 
+              onPress={handleBookNow}
+              disabled={isBooking}
+            >
+              {isBooking ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.confirmButtonText}>Confirm Booking</Text>
+              )}
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -381,5 +655,221 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 16,
     fontWeight: "700",
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    maxHeight: "85%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  modalDestination: {
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  modalDestinationName: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1F2937",
+  },
+  modalDestinationCountry: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+  dateSection: {
+    marginBottom: 20,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 12,
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dateButton: {
+    flex: 1,
+    backgroundColor: "#F3F4F6",
+    padding: 14,
+    borderRadius: 12,
+    marginHorizontal: 4,
+  },
+  dateLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  dateValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1F2937",
+  },
+  guestSection: {
+    marginBottom: 20,
+  },
+  guestCounter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    padding: 12,
+  },
+  counterButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  counterButtonDisabled: {
+    opacity: 0.5,
+  },
+  guestCount: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginHorizontal: 30,
+  },
+  priceSummary: {
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  priceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  priceLabel2: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  priceValue: {
+    fontSize: 14,
+    color: "#1F2937",
+  },
+  priceDivider: {
+    height: 1,
+    backgroundColor: "#E5E7EB",
+    marginVertical: 8,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#2563EB",
+  },
+  confirmButton: {
+    backgroundColor: "#2563EB",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#2563EB",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  confirmButtonDisabled: {
+    opacity: 0.7,
+  },
+  confirmButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  // Date Picker Styles
+  datePickerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  datePickerContent: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    width: "85%",
+    maxHeight: "70%",
+  },
+  datePickerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F2937",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  datePickerScroll: {
+    maxHeight: 300,
+  },
+  datePickerOption: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  datePickerOptionSelected: {
+    backgroundColor: "#EFF6FF",
+  },
+  datePickerOptionText: {
+    fontSize: 16,
+    color: "#374151",
+    textAlign: "center",
+  },
+  datePickerOptionTextSelected: {
+    color: "#2563EB",
+    fontWeight: "600",
+  },
+  datePickerClose: {
+    marginTop: 16,
+    paddingVertical: 12,
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+  },
+  datePickerCloseText: {
+    fontSize: 16,
+    color: "#6B7280",
+    fontWeight: "500",
   },
 });

@@ -1,4 +1,12 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// Simple in-memory storage (for Expo Go compatibility)
+const memoryStorage: Record<string, string> = {};
+
+const simpleStorage = {
+    getItem: (key: string): string | null => memoryStorage[key] || null,
+    setItem: (key: string, value: string): void => { memoryStorage[key] = value; },
+    removeItem: (key: string): void => { delete memoryStorage[key]; },
+    multiRemove: (keys: string[]): void => { keys.forEach(k => delete memoryStorage[k]); },
+};
 
 // Change this to your machine's local IP address
 // Run 'ipconfig' (Windows) or 'ifconfig' (Mac/Linux) to find it
@@ -10,7 +18,7 @@ const USER_KEY = "auth_user";
 
 // Generic fetch wrapper with auth header
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
-    const token = await AsyncStorage.getItem(TOKEN_KEY);
+    const token = simpleStorage.getItem(TOKEN_KEY);
     
     const headers: HeadersInit = {
         "Content-Type": "application/json",
@@ -38,32 +46,32 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
 // Token Management
 export const tokenStorage = {
     async getToken(): Promise<string | null> {
-        return await AsyncStorage.getItem(TOKEN_KEY);
+        return simpleStorage.getItem(TOKEN_KEY);
     },
     
     async setToken(token: string): Promise<void> {
-        await AsyncStorage.setItem(TOKEN_KEY, token);
+        simpleStorage.setItem(TOKEN_KEY, token);
     },
     
     async removeToken(): Promise<void> {
-        await AsyncStorage.removeItem(TOKEN_KEY);
+        simpleStorage.removeItem(TOKEN_KEY);
     },
     
     async getUser(): Promise<User | null> {
-        const userStr = await AsyncStorage.getItem(USER_KEY);
+        const userStr = simpleStorage.getItem(USER_KEY);
         return userStr ? JSON.parse(userStr) : null;
     },
     
     async setUser(user: User): Promise<void> {
-        await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+        simpleStorage.setItem(USER_KEY, JSON.stringify(user));
     },
     
     async removeUser(): Promise<void> {
-        await AsyncStorage.removeItem(USER_KEY);
+        simpleStorage.removeItem(USER_KEY);
     },
     
     async clear(): Promise<void> {
-        await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+        simpleStorage.multiRemove([TOKEN_KEY, USER_KEY]);
     }
 };
 
@@ -188,11 +196,11 @@ export const userApi = {
     }
 };
 
-// Settings Storage (AsyncStorage-based)
+// Settings Storage (in-memory based)
 export const settingsStorage = {
     async get<T>(key: string, defaultValue: T): Promise<T> {
         try {
-            const value = await AsyncStorage.getItem(`settings_${key}`);
+            const value = simpleStorage.getItem(`settings_${key}`);
             return value ? JSON.parse(value) : defaultValue;
         } catch {
             return defaultValue;
@@ -200,10 +208,10 @@ export const settingsStorage = {
     },
     
     async set<T>(key: string, value: T): Promise<void> {
-        await AsyncStorage.setItem(`settings_${key}`, JSON.stringify(value));
+        simpleStorage.setItem(`settings_${key}`, JSON.stringify(value));
     },
     
     async remove(key: string): Promise<void> {
-        await AsyncStorage.removeItem(`settings_${key}`);
+        simpleStorage.removeItem(`settings_${key}`);
     }
 };

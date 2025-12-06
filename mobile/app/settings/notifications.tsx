@@ -1,16 +1,67 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, ScrollView, Pressable, Switch } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, View, ScrollView, Pressable, Switch, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { settingsStorage } from "../../lib/api";
+
+interface NotificationSettings {
+  pushEnabled: boolean;
+  emailEnabled: boolean;
+  smsEnabled: boolean;
+  bookingUpdates: boolean;
+  specialOffers: boolean;
+  travelTips: boolean;
+  priceAlerts: boolean;
+}
+
+const NOTIFICATION_SETTINGS_KEY = "notification_settings";
+
+const defaultSettings: NotificationSettings = {
+  pushEnabled: true,
+  emailEnabled: true,
+  smsEnabled: false,
+  bookingUpdates: true,
+  specialOffers: true,
+  travelTips: false,
+  priceAlerts: true,
+};
 
 export default function NotificationsScreen() {
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [emailEnabled, setEmailEnabled] = useState(true);
-  const [smsEnabled, setSmsEnabled] = useState(false);
-  const [bookingUpdates, setBookingUpdates] = useState(true);
-  const [specialOffers, setSpecialOffers] = useState(true);
-  const [travelTips, setTravelTips] = useState(false);
-  const [priceAlerts, setPriceAlerts] = useState(true);
+  const [settings, setSettings] = useState<NotificationSettings>(defaultSettings);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load saved settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const savedSettings = await settingsStorage.get<NotificationSettings>(
+          NOTIFICATION_SETTINGS_KEY,
+          defaultSettings
+        );
+        setSettings(savedSettings);
+      } catch (error) {
+        console.log("Error loading notification settings:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  // Save settings whenever they change
+  const updateSetting = async (key: keyof NotificationSettings, value: boolean) => {
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+    await settingsStorage.set(NOTIFICATION_SETTINGS_KEY, newSettings);
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -37,10 +88,10 @@ export default function NotificationsScreen() {
               </View>
             </View>
             <Switch
-              value={pushEnabled}
-              onValueChange={setPushEnabled}
+              value={settings.pushEnabled}
+              onValueChange={(v) => updateSetting("pushEnabled", v)}
               trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={pushEnabled ? "#2563EB" : "#F3F4F6"}
+              thumbColor={settings.pushEnabled ? "#2563EB" : "#F3F4F6"}
             />
           </View>
 
@@ -53,10 +104,10 @@ export default function NotificationsScreen() {
               </View>
             </View>
             <Switch
-              value={emailEnabled}
-              onValueChange={setEmailEnabled}
+              value={settings.emailEnabled}
+              onValueChange={(v) => updateSetting("emailEnabled", v)}
               trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={emailEnabled ? "#2563EB" : "#F3F4F6"}
+              thumbColor={settings.emailEnabled ? "#2563EB" : "#F3F4F6"}
             />
           </View>
 
@@ -69,10 +120,10 @@ export default function NotificationsScreen() {
               </View>
             </View>
             <Switch
-              value={smsEnabled}
-              onValueChange={setSmsEnabled}
+              value={settings.smsEnabled}
+              onValueChange={(v) => updateSetting("smsEnabled", v)}
               trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={smsEnabled ? "#2563EB" : "#F3F4F6"}
+              thumbColor={settings.smsEnabled ? "#2563EB" : "#F3F4F6"}
             />
           </View>
         </View>
@@ -90,10 +141,10 @@ export default function NotificationsScreen() {
               </View>
             </View>
             <Switch
-              value={bookingUpdates}
-              onValueChange={setBookingUpdates}
+              value={settings.bookingUpdates}
+              onValueChange={(v) => updateSetting("bookingUpdates", v)}
               trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={bookingUpdates ? "#2563EB" : "#F3F4F6"}
+              thumbColor={settings.bookingUpdates ? "#2563EB" : "#F3F4F6"}
             />
           </View>
 
@@ -106,10 +157,10 @@ export default function NotificationsScreen() {
               </View>
             </View>
             <Switch
-              value={specialOffers}
-              onValueChange={setSpecialOffers}
+              value={settings.specialOffers}
+              onValueChange={(v) => updateSetting("specialOffers", v)}
               trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={specialOffers ? "#2563EB" : "#F3F4F6"}
+              thumbColor={settings.specialOffers ? "#2563EB" : "#F3F4F6"}
             />
           </View>
 
@@ -122,10 +173,10 @@ export default function NotificationsScreen() {
               </View>
             </View>
             <Switch
-              value={travelTips}
-              onValueChange={setTravelTips}
+              value={settings.travelTips}
+              onValueChange={(v) => updateSetting("travelTips", v)}
               trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={travelTips ? "#2563EB" : "#F3F4F6"}
+              thumbColor={settings.travelTips ? "#2563EB" : "#F3F4F6"}
             />
           </View>
 
@@ -138,10 +189,10 @@ export default function NotificationsScreen() {
               </View>
             </View>
             <Switch
-              value={priceAlerts}
-              onValueChange={setPriceAlerts}
+              value={settings.priceAlerts}
+              onValueChange={(v) => updateSetting("priceAlerts", v)}
               trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={priceAlerts ? "#2563EB" : "#F3F4F6"}
+              thumbColor={settings.priceAlerts ? "#2563EB" : "#F3F4F6"}
             />
           </View>
         </View>
@@ -156,6 +207,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F9FAFB",
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     flexDirection: "row",

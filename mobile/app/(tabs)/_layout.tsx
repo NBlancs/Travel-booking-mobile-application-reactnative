@@ -3,6 +3,7 @@ import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
 import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
+import { useBooking } from "../../context/BookingContext";
 
 const TabBarButton = React.forwardRef<any, BottomTabBarButtonProps>(({ children, ...props }, ref) => {
   return (
@@ -18,6 +19,7 @@ const TabBarButton = React.forwardRef<any, BottomTabBarButtonProps>(({ children,
 TabBarButton.displayName = "TabBarButton";
 
 export default function TabsLayout() {
+  const { hasNewBooking } = useBooking();
   return (
     <Tabs
       screenOptions={{
@@ -101,6 +103,19 @@ export default function TabsLayout() {
               alignItems: "center",
             }}>
               <Ionicons name="heart-outline" color={focused ? "#FFFFFF" : color} size={24} />
+              {hasNewBooking && (
+                <View style={{
+                  position: "absolute",
+                  top: 4,
+                  right: 4,
+                  width: 12,
+                  height: 12,
+                  borderRadius: 6,
+                  backgroundColor: "#EF4444",
+                  borderWidth: 2,
+                  borderColor: "#FFFFFF",
+                }} />
+              )}
             </View>
           ),
         }}

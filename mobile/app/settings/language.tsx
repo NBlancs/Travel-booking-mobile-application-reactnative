@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, View, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { settingsStorage } from "../../lib/api";
 
 const languages = [
   { code: "en", name: "English (US)", flag: "🇺🇸" },
@@ -15,8 +16,40 @@ const languages = [
   { code: "zh", name: "中文", flag: "🇨🇳" },
 ];
 
+const LANGUAGE_KEY = "selected_language";
+
 export default function LanguageScreen() {
   const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load saved language preference
+  useEffect(() => {
+    const loadLanguage = async () => {
+      try {
+        const savedLanguage = await settingsStorage.get<string>(LANGUAGE_KEY, "en");
+        setSelectedLanguage(savedLanguage);
+      } catch (error) {
+        console.log("Error loading language:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadLanguage();
+  }, []);
+
+  // Handle language selection
+  const handleLanguageSelect = async (code: string) => {
+    setSelectedLanguage(code);
+    await settingsStorage.set(LANGUAGE_KEY, code);
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -39,7 +72,7 @@ export default function LanguageScreen() {
             <Pressable
               key={language.code}
               style={styles.languageItem}
-              onPress={() => setSelectedLanguage(language.code)}
+              onPress={() => handleLanguageSelect(language.code)}
             >
               <Text style={styles.flag}>{language.flag}</Text>
               <Text style={styles.languageName}>{language.name}</Text>
@@ -60,6 +93,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F9FAFB",
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     flexDirection: "row",

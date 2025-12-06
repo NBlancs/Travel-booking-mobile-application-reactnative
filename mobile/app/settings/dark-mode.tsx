@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, Text, View, ScrollView, Pressable, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function DarkModeScreen() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [autoMode, setAutoMode] = useState(false);
+  const { themeMode, setThemeMode, useAmoledBlack, setUseAmoledBlack, isDark } = useTheme();
 
   return (
     <View style={styles.container}>
@@ -29,10 +29,7 @@ export default function DarkModeScreen() {
           
           <Pressable 
             style={styles.themeOption}
-            onPress={() => {
-              setDarkMode(false);
-              setAutoMode(false);
-            }}
+            onPress={() => setThemeMode("light")}
           >
             <View style={styles.themeIconContainer}>
               <Ionicons name="sunny" size={32} color="#F59E0B" />
@@ -41,17 +38,14 @@ export default function DarkModeScreen() {
               <Text style={styles.themeTitle}>Light Mode</Text>
               <Text style={styles.themeDescription}>Classic bright appearance</Text>
             </View>
-            {!darkMode && !autoMode && (
+            {themeMode === "light" && (
               <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
             )}
           </Pressable>
 
           <Pressable 
             style={styles.themeOption}
-            onPress={() => {
-              setDarkMode(true);
-              setAutoMode(false);
-            }}
+            onPress={() => setThemeMode("dark")}
           >
             <View style={styles.themeIconContainer}>
               <Ionicons name="moon" size={32} color="#6366F1" />
@@ -60,16 +54,14 @@ export default function DarkModeScreen() {
               <Text style={styles.themeTitle}>Dark Mode</Text>
               <Text style={styles.themeDescription}>Easy on the eyes in low light</Text>
             </View>
-            {darkMode && !autoMode && (
+            {themeMode === "dark" && (
               <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
             )}
           </Pressable>
 
           <Pressable 
             style={styles.themeOption}
-            onPress={() => {
-              setAutoMode(true);
-            }}
+            onPress={() => setThemeMode("auto")}
           >
             <View style={styles.themeIconContainer}>
               <Ionicons name="contrast" size={32} color="#8B5CF6" />
@@ -78,7 +70,7 @@ export default function DarkModeScreen() {
               <Text style={styles.themeTitle}>Auto</Text>
               <Text style={styles.themeDescription}>Matches system settings</Text>
             </View>
-            {autoMode && (
+            {themeMode === "auto" && (
               <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
             )}
           </Pressable>
@@ -97,11 +89,11 @@ export default function DarkModeScreen() {
               </View>
             </View>
             <Switch
-              value={darkMode}
-              onValueChange={setDarkMode}
+              value={useAmoledBlack}
+              onValueChange={setUseAmoledBlack}
               trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={darkMode ? "#2563EB" : "#F3F4F6"}
-              disabled={!darkMode}
+              thumbColor={useAmoledBlack ? "#2563EB" : "#F3F4F6"}
+              disabled={!isDark}
             />
           </View>
         </View>
