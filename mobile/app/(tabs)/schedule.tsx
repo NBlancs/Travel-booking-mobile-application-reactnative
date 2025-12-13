@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { StyleSheet, Text, View, ScrollView, ImageBackground, Pressable, ActivityIndicator, RefreshControl, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useBooking } from "../../context/BookingContext";
 import { useTheme } from "../../context/ThemeContext";
 import { Booking, authApi } from "../../lib/api";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 // Format date for display
 const formatDateRange = (checkIn: string, checkOut: string): string => {
@@ -32,12 +32,14 @@ export default function ScheduleScreen() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showTripModal, setShowTripModal] = useState(false);
 
-  // Fetch bookings and favorites on mount
-  useEffect(() => {
-    fetchBookings();
-    clearNewBookingFlag();
-    loadFavorites();
-  }, []);
+  // Fetch bookings and favorites when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchBookings();
+      clearNewBookingFlag();
+      loadFavorites();
+    }, [])
+  );
 
   const loadFavorites = async () => {
     try {
@@ -221,7 +223,7 @@ export default function ScheduleScreen() {
 
           {/* Favorites Section */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Favorites ❤️</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Favorites</Text>
             {loadingFavorites ? (
               <ActivityIndicator size="small" color={colors.primary} />
             ) : favorites.length > 0 ? (
@@ -554,6 +556,9 @@ const styles = StyleSheet.create({
   // Favorites Section
   favoritesScroll: {
     marginLeft: -4,
+    paddingLeft: 4,
+    paddingRight: 16,
+    paddingBottom: 32,
   },
   favoriteCard: {
     width: 160,
