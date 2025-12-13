@@ -14,8 +14,14 @@ const seedDB = async () => {
     await Destination.deleteMany({});
     console.log('Old destinations removed');
 
+    // Add priceFormatted to each destination
+    const destinationsWithFormatted = destinations.map(dest => ({
+      ...dest,
+      priceFormatted: `₱${dest.price.toLocaleString()}`
+    }));
+
     // Insert new data
-    await Destination.insertMany(destinations);
+    await Destination.insertMany(destinationsWithFormatted);
     console.log('New destinations added successfully! Total:', destinations.length);
     
     mongoose.connection.close();
