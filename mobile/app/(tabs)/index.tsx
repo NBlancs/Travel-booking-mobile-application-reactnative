@@ -260,7 +260,7 @@ export default function DashboardScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Explore the World</Text>
-            <Pressable>
+            <Pressable onPress={() => router.push("/(tabs)/booking")}>
               <Text style={[styles.seeAllText, { color: colors.textSecondary }]}>See all</Text>
             </Pressable>
           </View>
