@@ -12,18 +12,38 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const validateForm = () => {
+    const newErrors: { email?: string; password?: string } = {};
+    
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const onSubmit = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields.");
+    if (!validateForm()) {
       return;
     }
     try {
       setLoading(true);
-      await signIn(email, password);
+      await signIn(email.trim(), password);
       router.replace("/(tabs)");
     } catch (e: any) {
-      Alert.alert("Login failed", e?.message ?? "Please try again.");
+      const errorMessage = e?.message || "Please check your credentials and try again.";
+      Alert.alert("Login Failed", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -44,34 +64,52 @@ export default function LoginScreen() {
         />
         <View style={[styles.card, { backgroundColor: colors.surface }]}>
           <Text style={[styles.title, { color: colors.text }]}>Welcome back</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Email"
-            placeholderTextColor={colors.textSecondary}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-          />
-          <View style={[styles.passwordContainer, { borderColor: colors.border, backgroundColor: colors.background }]}>
+          <View style={styles.inputContainer}>
             <TextInput
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Password"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+              }}
+              placeholder="Email"
               placeholderTextColor={colors.textSecondary}
-              secureTextEntry={!showPassword}
-              style={[styles.passwordInput, { color: colors.text }]}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              style={[
+                styles.input, 
+                { color: colors.text, borderColor: errors.email ? colors.error : colors.border, backgroundColor: colors.background }
+              ]}
             />
-            <Pressable 
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeIcon}
-            >
-              <Ionicons 
-                name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                size={22} 
-                color={colors.textSecondary} 
+            {errors.email && <Text style={[styles.errorText, { color: colors.error }]}>{errors.email}</Text>}
+          </View>
+          <View style={styles.inputContainer}>
+            <View style={[
+              styles.passwordContainer, 
+              { borderColor: errors.password ? colors.error : colors.border, backgroundColor: colors.background }
+            ]}>
+              <TextInput
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                }}
+                placeholder="Password"
+                placeholderTextColor={colors.textSecondary}
+                secureTextEntry={!showPassword}
+                style={[styles.passwordInput, { color: colors.text }]}
               />
-            </Pressable>
+              <Pressable 
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
+              >
+                <Ionicons 
+                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={22} 
+                  color={colors.textSecondary} 
+                />
+              </Pressable>
+            </View>
+            {errors.password && <Text style={[styles.errorText, { color: colors.error }]}>{errors.password}</Text>}
           </View>
           <Pressable style={[styles.button, { backgroundColor: colors.primary }, loading && { opacity: 0.6 }]} disabled={loading} onPress={onSubmit}>
             <Text style={styles.buttonText}>{loading ? "Signing in..." : "Login"}</Text>
@@ -92,6 +130,7 @@ const styles = StyleSheet.create({
   logo: { width: 350, height: 120, alignSelf: "center", marginBottom: 32 },
   card: { borderRadius: 12, padding: 20, gap: 12, elevation: 0 },
   title: { fontSize: 22, fontWeight: "600", marginBottom: 8 },
+  inputContainer: { marginBottom: 4 },
   input: { borderWidth: 1, borderRadius: 8, padding: 12 },
   passwordContainer: {
     flexDirection: "row",
@@ -106,6 +145,11 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     padding: 4,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
   },
   button: { padding: 14, borderRadius: 8, alignItems: "center", marginTop: 4 },
   buttonText: { color: "#fff", fontWeight: "600" },

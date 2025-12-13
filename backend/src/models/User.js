@@ -4,30 +4,36 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
     username: {
-        type:String,
+        type: String,
         unique: true
     },
     email: {
-        type:String,
+        type: String,
         required: true,
         unique: true
     },
     password: {
-        type:String,
+        type: String,
         required: true,
         minlength: 6
     },
     profileImage: {
         type: String,
         default: ""
-
+    },
+    phone: {
+        type: String,
+        default: ""
+    },
+    address: {
+        type: String,
+        default: ""
     },
     favorites: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Destination"
     }]
-
-});
+}, { timestamps: true });
 
 userSchema.pre("save", async function(next){
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Pressable, Image, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -44,8 +44,21 @@ export default function SettingsScreen() {
   const { colors, isDark } = useTheme();
 
   const handleSignOut = async () => {
-    await signOut();
-    router.replace("/(auth)/getstarted");
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            await signOut();
+            router.replace("/(auth)/getstarted");
+          }
+        }
+      ]
+    );
   };
 
   const handleNavigate = (route: string) => {
@@ -73,13 +86,20 @@ export default function SettingsScreen() {
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
       {/* User Profile Header */}
       <View style={[styles.profileHeader, { backgroundColor: colors.surface }]}>
-        <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-          <Ionicons name="person" size={32} color="#FFFFFF" />
-        </View>
+        <Image 
+          source={{ uri: user?.profileImage || `https://api.dicebear.com/7.x/avataaars/png?seed=${user?.username || 'default'}` }} 
+          style={styles.avatarImage} 
+        />
         <View style={styles.profileInfo}>
-          <Text style={[styles.userName, { color: colors.text }]}>Welcome back!</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>{user?.username || "Welcome back!"}</Text>
           <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{user?.email || "user@example.com"}</Text>
         </View>
+        <Pressable 
+          style={[styles.editProfileButton, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}
+          onPress={() => handleNavigate("/settings/profile")}
+        >
+          <Ionicons name="create-outline" size={18} color={colors.primary} />
+        </Pressable>
       </View>
 
       {/* Settings Sections */}
@@ -137,6 +157,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
+  },
+  avatarImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 16,
+  },
+  editProfileButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: "auto",
   },
   profileInfo: {
     flex: 1,

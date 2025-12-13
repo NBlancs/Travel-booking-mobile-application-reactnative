@@ -92,7 +92,10 @@ export interface User {
     email: string;
     username: string;
     profileImage: string;
+    phone?: string;
+    address?: string;
     favorites: string[];
+    createdAt?: string;
 }
 
 export interface Booking {
@@ -220,7 +223,13 @@ export const userApi = {
         return await fetchWithAuth("/users/profile");
     },
     
-    async updateProfile(data: { username?: string; email?: string; profileImage?: string }): Promise<{ message: string; user: User }> {
+    async updateProfile(data: { 
+        username?: string; 
+        email?: string; 
+        profileImage?: string;
+        phone?: string;
+        address?: string;
+    }): Promise<{ message: string; user: User }> {
         return await fetchWithAuth("/users/profile", {
             method: "PUT",
             body: JSON.stringify(data),
