@@ -43,8 +43,8 @@ export default function SettingsScreen() {
   const { user, signOut } = useAuth();
   const { colors, isDark } = useTheme();
 
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await signOut();
     router.replace("/(auth)/getstarted");
   };
 
