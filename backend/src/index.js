@@ -5,6 +5,7 @@ import { connectDB } from "./lib/db.js"
 import authRoutes from "./routes/authRoutes.js"
 import bookingRoutes from "./routes/bookingRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
+import destinationRoutes from "./routes/destinationRoutes.js"
 
 
 const app = express();
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/destinations", destinationRoutes);
 
 
 app.listen(PORT, () => {

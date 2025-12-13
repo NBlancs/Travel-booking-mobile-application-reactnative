@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   StyleSheet, 
   Text, 
@@ -10,27 +10,57 @@ import {
   ImageBackground,
   Dimensions,
   Animated,
-  Modal
+  Modal,
+  ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { destinations, categories, extendedCategories } from "../../data/destinations";
+import { categories, extendedCategories } from "../../constants/Categories";
+import { destinationsApi, authApi } from "../../lib/api";
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
   const { colors, isDark } = useTheme();
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
+  const [destinations, setDestinations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [showHeartAnimation, setShowHeartAnimation] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(1)).current;
   const heartTranslateY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    loadDestinations();
+    loadFavorites();
+  }, []);
+
+  const loadDestinations = async () => {
+    try {
+      const data = await destinationsApi.getAll();
+      setDestinations(data);
+    } catch (error) {
+      console.error("Failed to load destinations", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadFavorites = async () => {
+    try {
+      const data = await authApi.getFavorites();
+      const favoriteIds = new Set(data.favorites.map((f: any) => f._id));
+      setFavorites(favoriteIds);
+    } catch (error) {
+      console.error("Failed to load favorites", error);
+    }
+  };
 
   // Filter destinations based on search query
   const filteredDestinations = destinations.filter((destination) => 
@@ -44,15 +74,16 @@ export default function DashboardScreen() {
     setShowSearchResults(text.length > 0);
   };
 
-  const handleSearchResultPress = (destinationId: number) => {
+  const handleSearchResultPress = (destinationId: string) => {
     setSearchQuery("");
     setShowSearchResults(false);
     router.push(`/property-details?id=${destinationId}`);
   };
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = async (id: string) => {
     const isCurrentlyFavorited = favorites.has(id);
     
+    // Optimistic update
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(id)) {
@@ -62,6 +93,23 @@ export default function DashboardScreen() {
       }
       return newFavorites;
     });
+
+    try {
+      await authApi.toggleFavorite(id);
+    } catch (error) {
+      console.error("Failed to toggle favorite", error);
+      // Revert on error
+      setFavorites(prev => {
+        const newFavorites = new Set(prev);
+        if (isCurrentlyFavorited) {
+          newFavorites.add(id);
+        } else {
+          newFavorites.delete(id);
+        }
+        return newFavorites;
+      });
+      return;
+    }
 
     // Show animation only when favoriting (not unfavoriting)
     if (!isCurrentlyFavorited) {
@@ -159,9 +207,9 @@ export default function DashboardScreen() {
               {filteredDestinations.length > 0 ? (
                 filteredDestinations.slice(0, 5).map((destination) => (
                   <Pressable
-                    key={destination.id}
+                    key={destination._id}
                     style={[styles.searchResultItem, { borderBottomColor: colors.border }]}
-                    onPress={() => handleSearchResultPress(destination.id)}
+                    onPress={() => handleSearchResultPress(destination._id)}
                   >
                     <Ionicons name="location-outline" size={18} color={colors.textSecondary} />
                     <View style={styles.searchResultText}>
@@ -223,37 +271,40 @@ export default function DashboardScreen() {
             showsHorizontalScrollIndicator={false}
             style={styles.propertiesScroll}
           >
-            {destinations.map((destination) => (
-              <Pressable 
-                key={destination.id} 
-                style={styles.propertyCard}
-                onPress={() => router.push(`/property-details?id=${destination.id}`)}
-              >
-                <ImageBackground
-                  source={destination.image}
-                  style={styles.propertyImage}
-                  imageStyle={{ borderRadius: 20 }}
-                  resizeMode="cover"
+            {loading ? (
+              <ActivityIndicator size="large" color={colors.primary} style={{ marginLeft: 20 }} />
+            ) : (
+              destinations.map((destination) => (
+                <Pressable 
+                  key={destination._id} 
+                  style={styles.propertyCard}
+                  onPress={() => router.push(`/property-details?id=${destination._id}`)}
                 >
-                  {/* Top overlay - Price and Favorite */}
-                  <View style={styles.topOverlay}>
-                    <View style={styles.priceTag}>
-                      <Text style={styles.priceText}>
-                        {destination.priceFormatted}
-                        <Text style={styles.priceSubtext}> /Night</Text>
-                      </Text>
-                    </View>
-                    <Pressable 
-                      style={styles.favoriteButton}
-                      onPress={() => toggleFavorite(destination.id)}
-                    >
-                      <Ionicons 
-                        name={favorites.has(destination.id) ? "heart" : "heart-outline"} 
-                        size={18} 
-                        color={favorites.has(destination.id) ? "#FF385C" : "#FFF"} 
+                  <ImageBackground
+                    source={{ uri: destination.imageUrl }}
+                    style={styles.propertyImage}
+                    imageStyle={{ borderRadius: 20 }}
+                    resizeMode="cover"
+                  >
+                    {/* Top overlay - Price and Favorite */}
+                    <View style={styles.topOverlay}>
+                      <View style={styles.priceTag}>
+                        <Text style={styles.priceText}>
+                          ₱{destination.price.toLocaleString()}
+                          <Text style={styles.priceSubtext}> /Night</Text>
+                        </Text>
+                      </View>
+                      <Pressable 
+                        style={styles.favoriteButton}
+                        onPress={() => toggleFavorite(destination._id)}
+                      >
+                        <Ionicons 
+                          name={favorites.has(destination._id) ? "heart" : "heart-outline"} 
+                          size={18} 
+                        color={favorites.has(destination._id) ? "#FF385C" : "#FFF"} 
                       />
                       {/* Floating Heart Animation */}
-                      {showHeartAnimation === destination.id && (
+                      {showHeartAnimation === destination._id && (
                         <Animated.View
                           style={[
                             styles.floatingHeart,
@@ -286,7 +337,8 @@ export default function DashboardScreen() {
                   </View>
                 </ImageBackground>
               </Pressable>
-            ))}
+            ))
+            )}
           </ScrollView>
         </View>
 

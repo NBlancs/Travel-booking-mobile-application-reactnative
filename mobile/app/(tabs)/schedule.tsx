@@ -3,14 +3,7 @@ import { StyleSheet, Text, View, ScrollView, ImageBackground, Pressable, Activit
 import { Ionicons } from "@expo/vector-icons";
 import { useBooking } from "../../context/BookingContext";
 import { useTheme } from "../../context/ThemeContext";
-import { destinations, Destination } from "../../data/destinations";
 import { Booking } from "../../lib/api";
-
-// Get destination image by destinationId
-const getDestinationImage = (destinationId: number): any => {
-  const destination = destinations.find((d) => d.id === destinationId);
-  return destination?.image || require("../../assets/images/osaka.jpg");
-};
 
 // Format date for display
 const formatDateRange = (checkIn: string, checkOut: string): string => {
@@ -82,7 +75,7 @@ export default function ScheduleScreen() {
   const renderTripCard = (booking: Booking) => (
     <View key={booking._id} style={styles.tripCard}>
       <ImageBackground
-        source={getDestinationImage(booking.destinationId)}
+        source={booking.destinationImage ? { uri: booking.destinationImage } : require("../../assets/images/osaka.jpg")}
         style={styles.tripImage}
         imageStyle={{ borderRadius: 12 }}
         resizeMode="cover"

@@ -1,9 +1,9 @@
-import React, { useRef, useState } from "react";
-import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable, Dimensions, TextInput, Animated } from "react-native";
+import React, { useRef, useState, useEffect } from "react";
+import { StyleSheet, Text, View, ScrollView, Image, ImageBackground, Pressable, Dimensions, TextInput, Animated, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTheme } from "../../context/ThemeContext";
-import { destinations, Destination } from "../../data/destinations";
+import { destinationsApi, authApi } from "../../lib/api";
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2; // Two cards per row with padding and gap
@@ -12,12 +12,39 @@ const HEADER_HEIGHT = 95; // Height of the header section
 export default function BookingScreen() {
   const { colors, isDark } = useTheme();
   const scrollY = useRef(new Animated.Value(0)).current;
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [showHeartAnimation, setShowHeartAnimation] = useState<number | null>(null);
+  const [destinations, setDestinations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [showHeartAnimation, setShowHeartAnimation] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(1)).current;
   const heartTranslateY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [destData, favData] = await Promise.all([
+        destinationsApi.getAll(),
+        authApi.getFavorites()
+      ]);
+      setDestinations(destData);
+      
+      const favSet = new Set<string>();
+      if (favData && favData.favorites) {
+        favData.favorites.forEach((fav: any) => favSet.add(fav._id));
+      }
+      setFavorites(favSet);
+    } catch (error) {
+      console.error("Failed to load data", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter destinations based on search query
   const filteredDestinations = destinations.filter((destination) => 
@@ -26,9 +53,10 @@ export default function BookingScreen() {
     destination.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = async (id: string) => {
     const isCurrentlyFavorited = favorites.has(id);
     
+    // Optimistic update
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(id)) {
@@ -38,6 +66,23 @@ export default function BookingScreen() {
       }
       return newFavorites;
     });
+
+    try {
+      await authApi.toggleFavorite(id);
+    } catch (error) {
+      // Revert on error
+      setFavorites(prev => {
+        const newFavorites = new Set(prev);
+        if (isCurrentlyFavorited) {
+          newFavorites.add(id);
+        } else {
+          newFavorites.delete(id);
+        }
+        return newFavorites;
+      });
+      console.error("Failed to toggle favorite", error);
+      return;
+    }
 
     // Show animation only when favoriting (not unfavoriting)
     if (!isCurrentlyFavorited) {
@@ -79,14 +124,14 @@ export default function BookingScreen() {
       });
     }
   };
-  const renderDestinationCard = (destination: Destination) => (
+  const renderDestinationCard = (destination: any) => (
     <Pressable 
-      key={destination.id} 
+      key={destination._id} 
       style={styles.card}
-      onPress={() => router.push(`/property-details?id=${destination.id}`)}
+      onPress={() => router.push(`/property-details?id=${destination._id}`)}
     >
       <ImageBackground
-        source={destination.image}
+        source={{ uri: destination.imageUrl }}
         style={styles.cardImage}
         imageStyle={{ borderRadius: 12 }}
         resizeMode="cover"
@@ -98,15 +143,15 @@ export default function BookingScreen() {
           </View>
           <Pressable 
             style={styles.favoriteButton}
-            onPress={() => toggleFavorite(destination.id)}
+            onPress={() => toggleFavorite(destination._id)}
           >
             <Ionicons 
-              name={favorites.has(destination.id) ? "heart" : "heart-outline"} 
+              name={favorites.has(destination._id) ? "heart" : "heart-outline"} 
               size={16} 
-              color={favorites.has(destination.id) ? "#FF385C" : "#FFF"} 
+              color={favorites.has(destination._id) ? "#FF385C" : "#FFF"} 
             />
             {/* Floating Heart Animation */}
-            {showHeartAnimation === destination.id && (
+            {showHeartAnimation === destination._id && (
               <Animated.View
                 style={[
                   styles.floatingHeart,
@@ -150,6 +195,14 @@ export default function BookingScreen() {
     outputRange: [HEADER_HEIGHT + 0, 0],
     extrapolate: 'clamp',
   });
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

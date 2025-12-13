@@ -7,7 +7,7 @@ const router = express.Router();
 // Create a new booking
 router.post("/", auth, async (req, res) => {
     try {
-        const { destinationId, destinationName, destinationCountry, checkInDate, checkOutDate, guests, totalPrice, specialRequests } = req.body;
+        const { destinationId, destinationName, destinationCountry, destinationImage, checkInDate, checkOutDate, guests, totalPrice, specialRequests } = req.body;
 
         if (!destinationId || !destinationName || !destinationCountry || !checkInDate || !checkOutDate || !totalPrice) {
             return res.status(400).json({ message: "Please provide all required fields." });
@@ -18,6 +18,7 @@ router.post("/", auth, async (req, res) => {
             destinationId,
             destinationName,
             destinationCountry,
+            destinationImage,
             checkInDate: new Date(checkInDate),
             checkOutDate: new Date(checkOutDate),
             guests: guests || 1,

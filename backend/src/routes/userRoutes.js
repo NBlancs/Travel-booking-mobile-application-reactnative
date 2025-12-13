@@ -1,5 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
+import Destination from "../models/Destination.js";
 import auth from "../middleware/auth.js";
 
 const router = express.Router();
@@ -98,6 +99,49 @@ router.put("/change-password", auth, async (req, res) => {
     } catch (error) {
         console.log("Error changing password:", error);
         return res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+// Toggle favorite destination
+router.post("/favorites/:destinationId", auth, async (req, res) => {
+    try {
+        const { destinationId } = req.params;
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const isFavorited = user.favorites.includes(destinationId);
+
+        if (isFavorited) {
+            user.favorites = user.favorites.filter(id => id.toString() !== destinationId);
+            await Destination.findByIdAndUpdate(destinationId, { $inc: { favoritesCount: -1 } });
+        } else {
+            user.favorites.push(destinationId);
+            await Destination.findByIdAndUpdate(destinationId, { $inc: { favoritesCount: 1 } });
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            message: isFavorited ? "Removed from favorites" : "Added to favorites",
+            favorites: user.favorites
+        });
+    } catch (error) {
+        console.log("Error toggling favorite:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+// Get user favorites
+router.get("/favorites", auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate("favorites");
+        res.status(200).json({ favorites: user.favorites });
+    } catch (error) {
+        console.log("Error fetching favorites:", error);
+        res.status(500).json({ message: "Internal server error." });
     }
 });
 

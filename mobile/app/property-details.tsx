@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -17,8 +17,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { destinations } from "../data/destinations";
-import { bookingsApi, CreateBookingData } from "../lib/api";
+import { bookingsApi, CreateBookingData, destinationsApi, authApi } from "../lib/api";
 import { useBooking } from "../context/BookingContext";
 import { useTheme } from "../context/ThemeContext";
 
@@ -26,7 +25,8 @@ const { width, height } = Dimensions.get("window");
 
 export default function PropertyDetailsScreen() {
   const { id } = useLocalSearchParams();
-  const destination = destinations.find((d) => d.id === Number(id));
+  const [destination, setDestination] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const { colors, isDark } = useTheme();
   const [isFavorite, setIsFavorite] = useState(false);
   
@@ -42,9 +42,53 @@ export default function PropertyDetailsScreen() {
   // Access booking context for notifications
   const { addBooking } = useBooking();
 
+  useEffect(() => {
+    loadDestination();
+    checkIfFavorite();
+  }, [id]);
+
+  const loadDestination = async () => {
+    try {
+      const data = await destinationsApi.getById(id as string);
+      setDestination(data);
+    } catch (error) {
+      console.error("Failed to load destination", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkIfFavorite = async () => {
+    try {
+      const data = await authApi.getFavorites();
+      const isFav = data.favorites.some((f: any) => f._id === id);
+      setIsFavorite(isFav);
+    } catch (error) {
+      console.error("Failed to check favorite", error);
+    }
+  };
+
+  const toggleFavorite = async () => {
+    try {
+      setIsFavorite(!isFavorite); // Optimistic update
+      await authApi.toggleFavorite(id as string);
+    } catch (error) {
+      setIsFavorite(!isFavorite); // Revert on error
+      console.error("Failed to toggle favorite", error);
+    }
+  };
+
   // Calculate number of nights and total price
   const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / 86400000));
   const totalPrice = destination ? destination.price * nights : 0;
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   if (!destination) {
     return (
@@ -56,12 +100,12 @@ export default function PropertyDetailsScreen() {
 
   // Property details based on destination
   const propertyDetails = {
-    guests: "10+ guests",
-    bedrooms: "4 bedrooms",
-    beds: "8 beds",
-    bathrooms: "4 bath",
-    address: getAddress(destination),
-    description: getDescription(destination),
+    guests: destination.amenities?.guests || "2 guests",
+    bedrooms: destination.amenities?.bedrooms || "1 bedroom",
+    beds: destination.amenities?.beds || "1 bed",
+    bathrooms: destination.amenities?.bathrooms || "1 bath",
+    address: destination.address || `${destination.location}, ${destination.country}`,
+    description: destination.description || "No description available.",
   };
 
   // Handle booking submission
@@ -71,9 +115,10 @@ export default function PropertyDetailsScreen() {
     setIsBooking(true);
     try {
       const bookingData: CreateBookingData = {
-        destinationId: destination.id,
+        destinationId: destination._id,
         destinationName: destination.name,
         destinationCountry: destination.country,
+        destinationImage: destination.imageUrl,
         checkInDate: checkInDate.toISOString(),
         checkOutDate: checkOutDate.toISOString(),
         guests: guests,
@@ -132,7 +177,7 @@ export default function PropertyDetailsScreen() {
       {/* Hero Image Section */}
       <View style={styles.heroSection}>
         <Image
-          source={destination.image}
+          source={{ uri: destination.imageUrl }}
           style={styles.heroImage}
           resizeMode="cover"
         />
@@ -166,7 +211,7 @@ export default function PropertyDetailsScreen() {
           <Text style={styles.headerTitle}>Details</Text>
           <Pressable
             style={[styles.favoriteButton, { backgroundColor: colors.surface }]}
-            onPress={() => setIsFavorite(!isFavorite)}
+            onPress={toggleFavorite}
           >
             <Ionicons
               name={isFavorite ? "heart" : "heart-outline"}
@@ -398,7 +443,7 @@ export default function PropertyDetailsScreen() {
             {/* Price Summary */}
             <View style={[styles.priceSummary, { backgroundColor: isDark ? colors.background : "#F9FAFB" }]}>
               <View style={styles.priceRow}>
-                <Text style={[styles.priceLabel2, { color: colors.textSecondary }]}>{destination.priceFormatted} × {nights} night{nights > 1 ? 's' : ''}</Text>
+                <Text style={[styles.priceLabel2, { color: colors.textSecondary }]}>₱{destination.price.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}</Text>
                 <Text style={[styles.priceValue, { color: colors.text }]}>₱{(destination.price * nights).toLocaleString()}</Text>
               </View>
               <View style={styles.priceRow}>
@@ -431,59 +476,7 @@ export default function PropertyDetailsScreen() {
   );
 }
 
-// Helper function to generate address based on destination
-function getAddress(destination: any): string {
-  const addresses: { [key: string]: string } = {
-    "Osaka": "6 Akanthous Street, Cyprus",
-    "Kuala Lumpur": "15 Jalan Ampang, Kuala Lumpur",
-    "Buenos Aires": "25 Avenida Corrientes, Buenos Aires",
-    "New York City": "350 5th Avenue, New York",
-    "Rome": "12 Via del Corso, Rome",
-    "London": "10 Downing Street, London",
-    "Bali": "45 Jalan Raya Ubud, Bali",
-    "Sydney Opera House": "Bennelong Point, Sydney",
-    "Dubai": "Sheikh Zayed Road, Dubai",
-    "Istanbul": "Sultanahmet Square, Istanbul",
-    "Barcelona": "La Rambla 100, Barcelona",
-    "Santorini": "Oia Village, Santorini",
-    "Kyoto Temples": "Kiyomizu-dera, Kyoto",
-    "Paris": "Champs-Élysées Avenue, Paris",
-    "Machu Picchu": "Aguas Calientes, Peru",
-    "Prague": "Old Town Square, Prague",
-    "Cameroon/ Kribi Beach": "Beach Road, Kribi",
-    "Fiji": "Coral Coast, Fiji Islands",
-    "Petra": "Wadi Musa, Ma'an",
-    "Great Wall of China": "Mutianyu Section, Beijing",
-  };
-  return addresses[destination.name] || `${destination.location}, ${destination.country}`;
-}
 
-// Helper function to generate description based on destination
-function getDescription(destination: any): string {
-  const descriptions: { [key: string]: string } = {
-    "Osaka": "Luxurious oceanview villa in Coral Bay with private pool, modern amenities, elegant interiors, perfect for families and romantic getaways.",
-    "Kuala Lumpur": "Modern luxury villa in the heart of Kuala Lumpur with stunning city views, infinity pool, and world-class amenities for an unforgettable stay.",
-    "Buenos Aires": "Elegant villa in Buenos Aires featuring contemporary design, private garden, rooftop terrace, and proximity to vibrant cultural attractions.",
-    "New York City": "Sophisticated urban villa in Manhattan with panoramic city views, luxury furnishings, and exclusive access to premium NYC attractions.",
-    "Rome": "Historic luxury villa near ancient landmarks with Italian garden, marble interiors, and authentic Roman architectural details.",
-    "London": "Prestigious villa in central London offering refined British elegance, private courtyard, and easy access to iconic landmarks.",
-    "Bali": "Tropical paradise villa surrounded by lush rice terraces, infinity pool overlooking valleys, traditional Balinese architecture with modern luxury.",
-    "Sydney Opera House": "Waterfront luxury villa with unobstructed harbour views, contemporary Australian design, and steps from the iconic Opera House.",
-    "Dubai": "Opulent desert villa with Arabian architectural elements, private infinity pool, panoramic skyline views, and ultra-modern amenities.",
-    "Istanbul": "Exquisite Bosphorus-side villa blending Ottoman elegance with modern comfort, private terrace, and breathtaking strait views.",
-    "Barcelona": "Mediterranean villa near the beach with Gaudí-inspired design, rooftop pool, and vibrant Catalan cultural surroundings.",
-    "Santorini": "Iconic white-washed villa perched on caldera cliffs with infinity pool, stunning sunset views, and authentic Cycladic charm.",
-    "Kyoto Temples": "Traditional Japanese villa with zen garden, tatami rooms, natural hot spring bath, and serene mountain views.",
-    "Paris": "Chic Parisian villa with Haussmann architecture, private courtyard, designer interiors, and views of the Eiffel Tower.",
-    "Machu Picchu": "Mountain retreat villa with panoramic Andean views, terraced gardens, stone architecture, and mystical atmosphere.",
-    "Prague": "Fairytale castle-style villa in historic district with Gothic details, tower views, and enchanting Old Town proximity.",
-    "Cameroon/ Kribi Beach": "Beachfront tropical villa with direct ocean access, palm-fringed gardens, and tranquil coastal atmosphere.",
-    "Fiji": "Private island villa surrounded by crystal-clear waters, overwater bungalow style, and pristine coral reef access.",
-    "Petra": "Desert luxury villa carved into rose-red cliffs with ancient Nabataean-inspired design and starlit terrace.",
-    "Great Wall of China": "Heritage villa at the foot of the Great Wall with traditional Chinese courtyard, imperial architecture, and mountain vistas.",
-  };
-  return descriptions[destination.name] || "Luxurious villa with private pool, modern amenities, elegant interiors, perfect for families and romantic getaways.";
-}
 
 const styles = StyleSheet.create({
   container: {

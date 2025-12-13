@@ -8,7 +8,7 @@ const bookingSchema = new mongoose.Schema({
     },
 
     destinationId: {
-        type: Number,
+        type: String,
         required: true
     },
 
@@ -20,6 +20,11 @@ const bookingSchema = new mongoose.Schema({
     destinationCountry: {
         type: String,
         required: true
+    },
+
+    destinationImage: {
+        type: String,
+        required: false
     },
 
     checkInDate: {

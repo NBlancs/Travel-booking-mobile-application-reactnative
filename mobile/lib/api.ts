@@ -4,13 +4,11 @@ const memoryStorage: Record<string, string> = {};
 const simpleStorage = {
     getItem: (key: string): string | null => memoryStorage[key] || null,
     setItem: (key: string, value: string): void => { memoryStorage[key] = value; },
-    removeItem: (key: string): void => { delete memoryStorage[key]; },
+    removeItem: (key: string): void => { delete memoryStorage[k]; },
     multiRemove: (keys: string[]): void => { keys.forEach(k => delete memoryStorage[k]); },
 };
 
-// Change this to your machine's local IP address
-// Run 'ipconfig' (Windows) or 'ifconfig' (Mac/Linux) to find it
-const API_BASE_URL = "http://192.168.1.57:3000/api";
+const API_BASE_URL = "http://10.0.2.2:3000/api";
 
 // Token storage keys
 const TOKEN_KEY = "auth_token";
@@ -75,20 +73,35 @@ export const tokenStorage = {
     }
 };
 
+// Destinations API
+export const destinationsApi = {
+    getAll: async () => {
+        return fetchWithAuth("/destinations");
+    },
+    getById: async (id: string) => {
+        return fetchWithAuth(`/destinations/${id}`);
+    },
+    search: async (query: string) => {
+        return fetchWithAuth(`/destinations/search/${query}`);
+    }
+};
+
 // Types
 export interface User {
     _id: string;
     email: string;
     username: string;
     profileImage: string;
+    favorites: string[];
 }
 
 export interface Booking {
     _id: string;
     user: string;
-    destinationId: number;
+    destinationId: string;
     destinationName: string;
     destinationCountry: string;
+    destinationImage?: string;
     checkInDate: string;
     checkOutDate: string;
     guests: number;
@@ -101,9 +114,10 @@ export interface Booking {
 }
 
 export interface CreateBookingData {
-    destinationId: number;
+    destinationId: string;
     destinationName: string;
     destinationCountry: string;
+    destinationImage?: string;
     checkInDate: string;
     checkOutDate: string;
     guests: number;
@@ -141,6 +155,16 @@ export const authApi = {
     
     async logout(): Promise<void> {
         await tokenStorage.clear();
+    },
+
+    async toggleFavorite(destinationId: string): Promise<any> {
+        return fetchWithAuth(`/users/favorites/${destinationId}`, {
+            method: "POST"
+        });
+    },
+
+    async getFavorites(): Promise<any> {
+        return fetchWithAuth("/users/favorites");
     }
 };
 
