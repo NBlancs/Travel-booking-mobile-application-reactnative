@@ -125,6 +125,14 @@ export interface CreateBookingData {
     specialRequests?: string;
 }
 
+export interface UpdateBookingData {
+    checkInDate?: string;
+    checkOutDate?: string;
+    guests?: number;
+    totalPrice?: number;
+    specialRequests?: string;
+}
+
 // Auth API
 export const authApi = {
     async register(email: string, username: string, password: string): Promise<{ token: string; user: User }> {
@@ -181,6 +189,13 @@ export const bookingsApi = {
     async create(bookingData: CreateBookingData): Promise<{ message: string; booking: Booking }> {
         return await fetchWithAuth("/bookings", {
             method: "POST",
+            body: JSON.stringify(bookingData),
+        });
+    },
+    
+    async update(id: string, bookingData: UpdateBookingData): Promise<{ message: string; booking: Booking }> {
+        return await fetchWithAuth(`/bookings/${id}`, {
+            method: "PATCH",
             body: JSON.stringify(bookingData),
         });
     },

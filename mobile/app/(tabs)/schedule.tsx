@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { StyleSheet, Text, View, ScrollView, ImageBackground, Pressable, ActivityIndicator, RefreshControl, Modal } from "react-native";
+import { StyleSheet, Text, View, ScrollView, ImageBackground, Pressable, ActivityIndicator, RefreshControl, Modal, Alert, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useBooking } from "../../context/BookingContext";
 import { useTheme } from "../../context/ThemeContext";
 import { Booking, authApi } from "../../lib/api";
 import { router, useFocusEffect } from "expo-router";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 // Format date for display
 const formatDateRange = (checkIn: string, checkOut: string): string => {
@@ -24,13 +25,25 @@ const calculateDays = (checkIn: string, checkOut: string): string => {
 };
 
 export default function ScheduleScreen() {
-  const { bookings, isLoading, fetchBookings, clearNewBookingFlag } = useBooking();
+  const { bookings, isLoading, fetchBookings, clearNewBookingFlag, updateBooking, cancelBooking } = useBooking();
   const { colors, isDark } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showTripModal, setShowTripModal] = useState(false);
+  const [showPastTrips, setShowPastTrips] = useState(false);
+  
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editCheckIn, setEditCheckIn] = useState(new Date());
+  const [editCheckOut, setEditCheckOut] = useState(new Date());
+  const [editGuests, setEditGuests] = useState(1);
+  const [editSpecialRequests, setEditSpecialRequests] = useState("");
+  const [showCheckInPicker, setShowCheckInPicker] = useState(false);
+  const [showCheckOutPicker, setShowCheckOutPicker] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Fetch bookings and favorites when screen is focused
   useFocusEffect(
@@ -64,6 +77,104 @@ export default function ScheduleScreen() {
   const upcomingBookings = useMemo(() => {
     return bookings.filter((b) => b.status !== "cancelled" && b.status !== "completed");
   }, [bookings]);
+
+  // Get past and cancelled bookings
+  const pastBookings = useMemo(() => {
+    return bookings.filter((b) => b.status === "cancelled" || b.status === "completed");
+  }, [bookings]);
+
+  // Calculate price per night from booking
+  const calculatePricePerNight = (booking: Booking): number => {
+    const days = Math.ceil(
+      (new Date(booking.checkOutDate).getTime() - new Date(booking.checkInDate).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return Math.round(booking.totalPrice / (days * booking.guests));
+  };
+
+  // Open edit modal with booking data
+  const openEditModal = (booking: Booking) => {
+    setEditCheckIn(new Date(booking.checkInDate));
+    setEditCheckOut(new Date(booking.checkOutDate));
+    setEditGuests(booking.guests);
+    setEditSpecialRequests(booking.specialRequests || "");
+    setShowTripModal(false);
+    setShowEditModal(true);
+  };
+
+  // Calculate new total price based on edited values
+  const calculateEditedTotal = (): number => {
+    if (!selectedBooking) return 0;
+    const pricePerNight = calculatePricePerNight(selectedBooking);
+    const days = Math.ceil(
+      (editCheckOut.getTime() - editCheckIn.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return pricePerNight * days * editGuests;
+  };
+
+  // Handle save booking changes
+  const handleSaveChanges = async () => {
+    if (!selectedBooking) return;
+
+    // Validate dates
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (editCheckIn < today) {
+      Alert.alert("Invalid Date", "Check-in date must be in the future.");
+      return;
+    }
+    if (editCheckOut <= editCheckIn) {
+      Alert.alert("Invalid Date", "Check-out date must be after check-in date.");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const updatedBooking = await updateBooking(selectedBooking._id, {
+        checkInDate: editCheckIn.toISOString(),
+        checkOutDate: editCheckOut.toISOString(),
+        guests: editGuests,
+        specialRequests: editSpecialRequests,
+        totalPrice: calculateEditedTotal(),
+      });
+      setSelectedBooking(updatedBooking);
+      setShowEditModal(false);
+      Alert.alert("Success", "Your booking has been updated.");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to update booking.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Handle cancel booking
+  const handleCancelBooking = () => {
+    if (!selectedBooking) return;
+
+    Alert.alert(
+      "Cancel Trip",
+      "Are you sure you want to cancel this trip?\n\n⚠️ Cancellation Policy:\nCancellations within 24 hours of check-in may incur fees. This action cannot be undone.",
+      [
+        { text: "Keep Booking", style: "cancel" },
+        {
+          text: "Cancel Trip",
+          style: "destructive",
+          onPress: async () => {
+            setIsCancelling(true);
+            try {
+              await cancelBooking(selectedBooking._id);
+              setShowTripModal(false);
+              setSelectedBooking(null);
+              Alert.alert("Trip Cancelled", "Your booking has been cancelled successfully.");
+            } catch (error: any) {
+              Alert.alert("Error", error.message || "Failed to cancel booking.");
+            } finally {
+              setIsCancelling(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   // Generate today's schedule from the nearest booking
   const todaySchedule = useMemo(() => {
@@ -169,6 +280,43 @@ export default function ScheduleScreen() {
     </View>
   );
 
+  const renderPastTripCard = (booking: Booking) => (
+    <Pressable 
+      key={booking._id} 
+      style={[styles.pastTripCard, { backgroundColor: colors.surface }]}
+      onPress={() => {
+        setSelectedBooking(booking);
+        setShowTripModal(true);
+      }}
+    >
+      <ImageBackground
+        source={booking.destinationImage ? { uri: booking.destinationImage } : require("../../assets/images/osaka.jpg")}
+        style={styles.pastTripImage}
+        imageStyle={{ borderRadius: 8 }}
+        resizeMode="cover"
+      />
+      <View style={styles.pastTripInfo}>
+        <Text style={[styles.pastTripName, { color: colors.text }]} numberOfLines={1}>
+          {booking.destinationName}
+        </Text>
+        <Text style={[styles.pastTripDates, { color: colors.textSecondary }]}>
+          {formatDateRange(booking.checkInDate, booking.checkOutDate)}
+        </Text>
+        <View style={[
+          styles.pastTripBadge,
+          booking.status === "cancelled" ? styles.cancelledBadge : styles.completedBadge
+        ]}>
+          <Text style={[
+            styles.pastTripStatus,
+            booking.status === "cancelled" ? styles.cancelledText : styles.completedText
+          ]}>
+            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ImageBackground
@@ -244,6 +392,33 @@ export default function ScheduleScreen() {
               </View>
             )}
           </View>
+
+          {/* Past & Cancelled Trips Section */}
+          {pastBookings.length > 0 && (
+            <View style={styles.section}>
+              <Pressable 
+                style={styles.collapsibleHeader}
+                onPress={() => setShowPastTrips(!showPastTrips)}
+              >
+                <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 0 }]}>
+                  Past & Cancelled Trips
+                </Text>
+                <View style={styles.collapsibleBadge}>
+                  <Text style={styles.collapsibleCount}>{pastBookings.length}</Text>
+                  <Ionicons 
+                    name={showPastTrips ? "chevron-up" : "chevron-down"} 
+                    size={20} 
+                    color={colors.textSecondary} 
+                  />
+                </View>
+              </Pressable>
+              {showPastTrips && (
+                <View style={styles.pastTripsContainer}>
+                  {pastBookings.map(renderPastTripCard)}
+                </View>
+              )}
+            </View>
+          )}
 
           {/* Bottom spacing for tab bar */}
           <View style={styles.bottomSpacing} />
@@ -342,16 +517,61 @@ export default function ScheduleScreen() {
                 </View>
 
                 {/* Status Badge */}
-                <View style={[styles.modalStatusBadge, selectedBooking.status === "confirmed" ? styles.confirmedBadge : styles.pendingBadge]}>
+                <View style={[
+                  styles.modalStatusBadge, 
+                  selectedBooking.status === "confirmed" ? styles.confirmedBadge : 
+                  selectedBooking.status === "cancelled" ? styles.cancelledBadge :
+                  selectedBooking.status === "completed" ? styles.completedBadge : styles.pendingBadge
+                ]}>
                   <Ionicons 
-                    name={selectedBooking.status === "confirmed" ? "checkmark-circle" : "time"} 
+                    name={
+                      selectedBooking.status === "confirmed" ? "checkmark-circle" : 
+                      selectedBooking.status === "cancelled" ? "close-circle" :
+                      selectedBooking.status === "completed" ? "trophy" : "time"
+                    } 
                     size={18} 
-                    color={selectedBooking.status === "confirmed" ? "#065F46" : "#92400E"} 
+                    color={
+                      selectedBooking.status === "confirmed" ? "#065F46" : 
+                      selectedBooking.status === "cancelled" ? "#991B1B" :
+                      selectedBooking.status === "completed" ? "#1E40AF" : "#92400E"
+                    } 
                   />
-                  <Text style={[styles.modalStatusText, selectedBooking.status === "confirmed" ? styles.confirmedText : styles.pendingText]}>
+                  <Text style={[
+                    styles.modalStatusText, 
+                    selectedBooking.status === "confirmed" ? styles.confirmedText : 
+                    selectedBooking.status === "cancelled" ? styles.cancelledText :
+                    selectedBooking.status === "completed" ? styles.completedText : styles.pendingText
+                  ]}>
                     {selectedBooking.status.charAt(0).toUpperCase() + selectedBooking.status.slice(1)}
                   </Text>
                 </View>
+
+                {/* Action Buttons - Only show for pending/confirmed bookings */}
+                {(selectedBooking.status === "pending" || selectedBooking.status === "confirmed") && (
+                  <View style={styles.modalActions}>
+                    <Pressable 
+                      style={[styles.actionButton, styles.editButton]}
+                      onPress={() => openEditModal(selectedBooking)}
+                    >
+                      <Ionicons name="create-outline" size={18} color="#2563EB" />
+                      <Text style={styles.editButtonText}>Modify Booking</Text>
+                    </Pressable>
+                    <Pressable 
+                      style={[styles.actionButton, styles.cancelTripButton]}
+                      onPress={handleCancelBooking}
+                      disabled={isCancelling}
+                    >
+                      {isCancelling ? (
+                        <ActivityIndicator size="small" color="#DC2626" />
+                      ) : (
+                        <>
+                          <Ionicons name="close-circle-outline" size={18} color="#DC2626" />
+                          <Text style={styles.cancelTripButtonText}>Cancel Trip</Text>
+                        </>
+                      )}
+                    </Pressable>
+                  </View>
+                )}
 
                 {/* Close Button */}
                 <Pressable 
@@ -361,6 +581,156 @@ export default function ScheduleScreen() {
                   <Text style={styles.modalButtonText}>Close</Text>
                 </Pressable>
               </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Booking Modal */}
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            {selectedBooking && (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Modal Header */}
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: colors.text }]}>Modify Booking</Text>
+                  <Pressable onPress={() => setShowEditModal(false)} style={styles.modalCloseButton}>
+                    <Ionicons name="close" size={24} color={colors.textSecondary} />
+                  </Pressable>
+                </View>
+
+                {/* Destination Info */}
+                <View style={[styles.editDestinationCard, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}>
+                  <Text style={[styles.editDestinationName, { color: colors.text }]}>
+                    {selectedBooking.destinationName}, {selectedBooking.destinationCountry}
+                  </Text>
+                </View>
+
+                {/* Check-in Date */}
+                <View style={styles.editField}>
+                  <Text style={[styles.editLabel, { color: colors.text }]}>Check-in Date</Text>
+                  <Pressable 
+                    style={[styles.editDateButton, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}
+                    onPress={() => setShowCheckInPicker(true)}
+                  >
+                    <Ionicons name="calendar-outline" size={20} color={colors.textSecondary} />
+                    <Text style={[styles.editDateText, { color: colors.text }]}>
+                      {editCheckIn.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                    </Text>
+                  </Pressable>
+                </View>
+                {showCheckInPicker && (
+                  <DateTimePicker
+                    value={editCheckIn}
+                    mode="date"
+                    minimumDate={new Date()}
+                    onChange={(event, date) => {
+                      setShowCheckInPicker(false);
+                      if (date) {
+                        setEditCheckIn(date);
+                        // Auto-adjust checkout if needed
+                        if (date >= editCheckOut) {
+                          const nextDay = new Date(date);
+                          nextDay.setDate(nextDay.getDate() + 1);
+                          setEditCheckOut(nextDay);
+                        }
+                      }
+                    }}
+                  />
+                )}
+
+                {/* Check-out Date */}
+                <View style={styles.editField}>
+                  <Text style={[styles.editLabel, { color: colors.text }]}>Check-out Date</Text>
+                  <Pressable 
+                    style={[styles.editDateButton, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}
+                    onPress={() => setShowCheckOutPicker(true)}
+                  >
+                    <Ionicons name="calendar" size={20} color={colors.textSecondary} />
+                    <Text style={[styles.editDateText, { color: colors.text }]}>
+                      {editCheckOut.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                    </Text>
+                  </Pressable>
+                </View>
+                {showCheckOutPicker && (
+                  <DateTimePicker
+                    value={editCheckOut}
+                    mode="date"
+                    minimumDate={new Date(editCheckIn.getTime() + 86400000)}
+                    onChange={(event, date) => {
+                      setShowCheckOutPicker(false);
+                      if (date) setEditCheckOut(date);
+                    }}
+                  />
+                )}
+
+                {/* Guests */}
+                <View style={styles.editField}>
+                  <Text style={[styles.editLabel, { color: colors.text }]}>Number of Guests</Text>
+                  <View style={styles.guestCounter}>
+                    <Pressable 
+                      style={[styles.guestButton, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}
+                      onPress={() => setEditGuests(Math.max(1, editGuests - 1))}
+                    >
+                      <Ionicons name="remove" size={20} color={colors.text} />
+                    </Pressable>
+                    <Text style={[styles.guestCount, { color: colors.text }]}>{editGuests}</Text>
+                    <Pressable 
+                      style={[styles.guestButton, { backgroundColor: isDark ? colors.background : "#F3F4F6" }]}
+                      onPress={() => setEditGuests(Math.min(10, editGuests + 1))}
+                    >
+                      <Ionicons name="add" size={20} color={colors.text} />
+                    </Pressable>
+                  </View>
+                </View>
+
+                {/* Special Requests */}
+                <View style={styles.editField}>
+                  <Text style={[styles.editLabel, { color: colors.text }]}>Special Requests</Text>
+                  <TextInput
+                    style={[styles.editTextInput, { backgroundColor: isDark ? colors.background : "#F3F4F6", color: colors.text }]}
+                    placeholder="Any special requests? (optional)"
+                    placeholderTextColor={colors.textSecondary}
+                    value={editSpecialRequests}
+                    onChangeText={setEditSpecialRequests}
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
+
+                {/* Updated Price */}
+                <View style={[styles.editPriceCard, { backgroundColor: isDark ? colors.background : "#EFF6FF" }]}>
+                  <Text style={[styles.editPriceLabel, { color: colors.textSecondary }]}>Updated Total</Text>
+                  <Text style={styles.editPriceValue}>₱{calculateEditedTotal().toLocaleString()}</Text>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={styles.editActions}>
+                  <Pressable 
+                    style={[styles.editCancelButton, { borderColor: colors.border }]}
+                    onPress={() => setShowEditModal(false)}
+                  >
+                    <Text style={[styles.editCancelButtonText, { color: colors.text }]}>Cancel</Text>
+                  </Pressable>
+                  <Pressable 
+                    style={styles.editSaveButton}
+                    onPress={handleSaveChanges}
+                    disabled={isUpdating}
+                  >
+                    {isUpdating ? (
+                      <ActivityIndicator size="small" color="#FFF" />
+                    ) : (
+                      <Text style={styles.editSaveButtonText}>Save Changes</Text>
+                    )}
+                  </Pressable>
+                </View>
+              </ScrollView>
             )}
           </View>
         </View>
@@ -496,6 +866,12 @@ const styles = StyleSheet.create({
   pendingBadge: {
     backgroundColor: "#FEF3C7",
   },
+  cancelledBadge: {
+    backgroundColor: "#FEE2E2",
+  },
+  completedBadge: {
+    backgroundColor: "#DBEAFE",
+  },
   statusText: {
     fontSize: 12,
     fontWeight: "600",
@@ -505,6 +881,12 @@ const styles = StyleSheet.create({
   },
   pendingText: {
     color: "#92400E",
+  },
+  cancelledText: {
+    color: "#991B1B",
+  },
+  completedText: {
+    color: "#1E40AF",
   },
   // Schedule Card
   scheduleCard: {
@@ -751,6 +1133,204 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  // Modal Action Buttons
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 6,
+  },
+  editButton: {
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+  },
+  editButtonText: {
+    color: "#2563EB",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  cancelTripButton: {
+    backgroundColor: "#FEF2F2",
+    borderWidth: 1,
+    borderColor: "#FECACA",
+  },
+  cancelTripButtonText: {
+    color: "#DC2626",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  // Past Trips Section
+  collapsibleHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  collapsibleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  collapsibleCount: {
+    backgroundColor: "#6B7280",
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "600",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  pastTripsContainer: {
+    gap: 8,
+  },
+  pastTripCard: {
+    flexDirection: "row",
+    padding: 12,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  pastTripImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+  },
+  pastTripInfo: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: "center",
+  },
+  pastTripName: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  pastTripDates: {
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  pastTripBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  pastTripStatus: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  // Edit Modal Styles
+  editDestinationCard: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  editDestinationName: {
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  editField: {
+    marginBottom: 20,
+  },
+  editLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  editDateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 10,
+    gap: 10,
+  },
+  editDateText: {
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  guestCounter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
+  },
+  guestButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  guestCount: {
+    fontSize: 24,
+    fontWeight: "700",
+    minWidth: 40,
+    textAlign: "center",
+  },
+  editTextInput: {
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 15,
+    minHeight: 80,
+    textAlignVertical: "top",
+  },
+  editPriceCard: {
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  editPriceLabel: {
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  editPriceValue: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#2563EB",
+  },
+  editActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 20,
+  },
+  editCancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    borderWidth: 1,
+  },
+  editCancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  editSaveButton: {
+    flex: 1,
+    backgroundColor: "#2563EB",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  editSaveButtonText: {
     color: "#FFF",
     fontSize: 16,
     fontWeight: "600",

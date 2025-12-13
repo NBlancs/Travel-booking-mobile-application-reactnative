@@ -72,10 +72,10 @@ router.get("/:id", auth, async (req, res) => {
     }
 });
 
-// Update booking status
+// Update booking (full update for pending/confirmed bookings)
 router.patch("/:id", auth, async (req, res) => {
     try {
-        const { status, paymentStatus } = req.body;
+        const { status, paymentStatus, checkInDate, checkOutDate, guests, specialRequests, totalPrice } = req.body;
 
         const booking = await Booking.findOne({
             _id: req.params.id,
@@ -86,6 +86,44 @@ router.patch("/:id", auth, async (req, res) => {
             return res.status(404).json({ message: "Booking not found." });
         }
 
+        // Only allow full updates for pending or confirmed bookings
+        if (checkInDate || checkOutDate || guests || specialRequests !== undefined || totalPrice) {
+            if (booking.status === "cancelled" || booking.status === "completed") {
+                return res.status(400).json({ 
+                    message: "Cannot modify a cancelled or completed booking." 
+                });
+            }
+
+            // Validate check-in date is in the future for date changes
+            if (checkInDate) {
+                const newCheckIn = new Date(checkInDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (newCheckIn < today) {
+                    return res.status(400).json({ 
+                        message: "Check-in date must be in the future." 
+                    });
+                }
+                booking.checkInDate = newCheckIn;
+            }
+
+            if (checkOutDate) {
+                const newCheckOut = new Date(checkOutDate);
+                const checkIn = checkInDate ? new Date(checkInDate) : booking.checkInDate;
+                if (newCheckOut <= checkIn) {
+                    return res.status(400).json({ 
+                        message: "Check-out date must be after check-in date." 
+                    });
+                }
+                booking.checkOutDate = newCheckOut;
+            }
+
+            if (guests) booking.guests = guests;
+            if (specialRequests !== undefined) booking.specialRequests = specialRequests;
+            if (totalPrice) booking.totalPrice = totalPrice;
+        }
+
+        // Status updates (allowed for any booking)
         if (status) booking.status = status;
         if (paymentStatus) booking.paymentStatus = paymentStatus;
 
