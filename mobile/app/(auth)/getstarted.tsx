@@ -1,6 +1,6 @@
 import React from "react";
 import { ImageBackground, StyleSheet, Text, View, Pressable, Image } from "react-native";
-import { Link } from "expo-router";
+import { router } from "expo-router";
 import { useTheme } from "../../context/ThemeContext";
 
 export default function GetStartedScreen() {
@@ -28,11 +28,12 @@ export default function GetStartedScreen() {
             Find the perfect getaway from thousands of destinations around the world
           </Text>
 
-          <Link href="/(auth)/login" asChild>
-            <Pressable style={[styles.button, { backgroundColor: colors.primary }]}>
-              <Text style={styles.buttonText}>GET STARTED</Text>
-            </Pressable>
-          </Link>
+          <Pressable 
+            style={[styles.button, { backgroundColor: colors.primary }]}
+            onPress={() => router.push("/(auth)/login")}
+          >
+            <Text style={styles.buttonText}>GET STARTED</Text>
+          </Pressable>
         </View>
       </View>
     </ImageBackground>
