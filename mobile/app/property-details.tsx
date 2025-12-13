@@ -14,6 +14,7 @@ import {
   Platform,
   TextInput,
 } from "react-native";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { destinations } from "../data/destinations";
@@ -122,16 +123,7 @@ export default function PropertyDetailsScreen() {
     });
   };
 
-  // Generate array of dates starting from a given date
-  const generateDateOptions = (startDate: Date, days: number): Date[] => {
-    const dates: Date[] = [];
-    for (let i = 0; i < days; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  };
+
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -279,88 +271,107 @@ export default function PropertyDetailsScreen() {
               </View>
             </View>
 
-            {/* Custom Date Picker Modal for Check-in */}
-            <Modal
-              visible={showCheckInPicker}
-              transparent={true}
-              animationType="fade"
-              onRequestClose={() => setShowCheckInPicker(false)}
-            >
-              <Pressable style={styles.datePickerOverlay} onPress={() => setShowCheckInPicker(false)}>
-                <View style={[styles.datePickerContent, { backgroundColor: colors.surface }]}>
-                  <Text style={[styles.datePickerTitle, { color: colors.text }]}>Select Check-in Date</Text>
-                  <ScrollView style={styles.datePickerScroll} showsVerticalScrollIndicator={false}>
-                    {generateDateOptions(new Date(), 90).map((date) => (
-                      <Pressable
-                        key={date.toISOString()}
-                        style={[
-                          styles.datePickerOption,
-                          checkInDate.toDateString() === date.toDateString() && { backgroundColor: isDark ? colors.primary + "20" : "#EFF6FF" }
-                        ]}
-                        onPress={() => {
-                          setCheckInDate(date);
-                          if (date >= checkOutDate) {
-                            setCheckOutDate(new Date(date.getTime() + 86400000));
+            {/* Date Picker for Check-in */}
+            {showCheckInPicker && (
+              Platform.OS === 'ios' ? (
+                <Modal
+                  visible={showCheckInPicker}
+                  transparent={true}
+                  animationType="fade"
+                  onRequestClose={() => setShowCheckInPicker(false)}
+                >
+                  <Pressable style={styles.datePickerOverlay} onPress={() => setShowCheckInPicker(false)}>
+                    <View style={[styles.datePickerContent, { backgroundColor: colors.surface }]}>
+                      <Text style={[styles.datePickerTitle, { color: colors.text }]}>Select Check-in Date</Text>
+                      <DateTimePicker
+                        testID="checkInPicker"
+                        value={checkInDate}
+                        mode="date"
+                        display="inline"
+                        onChange={(event, date) => {
+                          if (date) {
+                            setCheckInDate(date);
+                            if (date >= checkOutDate) {
+                              setCheckOutDate(new Date(date.getTime() + 86400000));
+                            }
                           }
-                          setShowCheckInPicker(false);
                         }}
-                      >
-                        <Text style={[
-                          styles.datePickerOptionText,
-                          { color: colors.text },
-                          checkInDate.toDateString() === date.toDateString() && { color: colors.primary, fontWeight: "600" }
-                        ]}>
-                          {formatDateLong(date)}
-                        </Text>
+                        minimumDate={new Date()}
+                        textColor={colors.text}
+                      />
+                      <Pressable style={[styles.datePickerClose, { borderTopColor: colors.border }]} onPress={() => setShowCheckInPicker(false)}>
+                        <Text style={[styles.datePickerCloseText, { color: colors.textSecondary }]}>Done</Text>
                       </Pressable>
-                    ))}
-                  </ScrollView>
-                  <Pressable style={[styles.datePickerClose, { borderTopColor: colors.border }]} onPress={() => setShowCheckInPicker(false)}>
-                    <Text style={[styles.datePickerCloseText, { color: colors.textSecondary }]}>Cancel</Text>
+                    </View>
                   </Pressable>
-                </View>
-              </Pressable>
-            </Modal>
+                </Modal>
+              ) : (
+                <DateTimePicker
+                  testID="checkInPicker"
+                  value={checkInDate}
+                  mode="date"
+                  display="default"
+                  onChange={(event, date) => {
+                    setShowCheckInPicker(false);
+                    if (event.type === 'set' && date) {
+                      setCheckInDate(date);
+                      if (date >= checkOutDate) {
+                        setCheckOutDate(new Date(date.getTime() + 86400000));
+                      }
+                    }
+                  }}
+                  minimumDate={new Date()}
+                />
+              )
+            )}
 
-            {/* Custom Date Picker Modal for Check-out */}
-            <Modal
-              visible={showCheckOutPicker}
-              transparent={true}
-              animationType="fade"
-              onRequestClose={() => setShowCheckOutPicker(false)}
-            >
-              <Pressable style={styles.datePickerOverlay} onPress={() => setShowCheckOutPicker(false)}>
-                <View style={[styles.datePickerContent, { backgroundColor: colors.surface }]}>
-                  <Text style={[styles.datePickerTitle, { color: colors.text }]}>Select Check-out Date</Text>
-                  <ScrollView style={styles.datePickerScroll} showsVerticalScrollIndicator={false}>
-                    {generateDateOptions(new Date(checkInDate.getTime() + 86400000), 90).map((date) => (
-                      <Pressable
-                        key={date.toISOString()}
-                        style={[
-                          styles.datePickerOption,
-                          checkOutDate.toDateString() === date.toDateString() && { backgroundColor: isDark ? colors.primary + "20" : "#EFF6FF" }
-                        ]}
-                        onPress={() => {
-                          setCheckOutDate(date);
-                          setShowCheckOutPicker(false);
+            {/* Date Picker for Check-out */}
+            {showCheckOutPicker && (
+              Platform.OS === 'ios' ? (
+                <Modal
+                  visible={showCheckOutPicker}
+                  transparent={true}
+                  animationType="fade"
+                  onRequestClose={() => setShowCheckOutPicker(false)}
+                >
+                  <Pressable style={styles.datePickerOverlay} onPress={() => setShowCheckOutPicker(false)}>
+                    <View style={[styles.datePickerContent, { backgroundColor: colors.surface }]}>
+                      <Text style={[styles.datePickerTitle, { color: colors.text }]}>Select Check-out Date</Text>
+                      <DateTimePicker
+                        testID="checkOutPicker"
+                        value={checkOutDate}
+                        mode="date"
+                        display="inline"
+                        onChange={(event, date) => {
+                          if (date) {
+                            setCheckOutDate(date);
+                          }
                         }}
-                      >
-                        <Text style={[
-                          styles.datePickerOptionText,
-                          { color: colors.text },
-                          checkOutDate.toDateString() === date.toDateString() && { color: colors.primary, fontWeight: "600" }
-                        ]}>
-                          {formatDateLong(date)}
-                        </Text>
+                        minimumDate={new Date(checkInDate.getTime() + 86400000)}
+                        textColor={colors.text}
+                      />
+                      <Pressable style={[styles.datePickerClose, { borderTopColor: colors.border }]} onPress={() => setShowCheckOutPicker(false)}>
+                        <Text style={[styles.datePickerCloseText, { color: colors.textSecondary }]}>Done</Text>
                       </Pressable>
-                    ))}
-                  </ScrollView>
-                  <Pressable style={[styles.datePickerClose, { borderTopColor: colors.border }]} onPress={() => setShowCheckOutPicker(false)}>
-                    <Text style={[styles.datePickerCloseText, { color: colors.textSecondary }]}>Cancel</Text>
+                    </View>
                   </Pressable>
-                </View>
-              </Pressable>
-            </Modal>
+                </Modal>
+              ) : (
+                <DateTimePicker
+                  testID="checkOutPicker"
+                  value={checkOutDate}
+                  mode="date"
+                  display="default"
+                  onChange={(event, date) => {
+                    setShowCheckOutPicker(false);
+                    if (event.type === 'set' && date) {
+                      setCheckOutDate(date);
+                    }
+                  }}
+                  minimumDate={new Date(checkInDate.getTime() + 86400000)}
+                />
+              )
+            )}
 
             {/* Guest Counter */}
             <View style={styles.guestSection}>
