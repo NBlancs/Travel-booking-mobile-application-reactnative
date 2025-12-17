@@ -356,19 +356,6 @@ export default function ScheduleScreen() {
             )}
           </View>
 
-          {/* Today's Schedule Section */}
-          {todaySchedule.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Today's Schedule</Text>
-              <View style={[styles.scheduleCard, { backgroundColor: colors.surface }]}>
-                <Text style={[styles.scheduleDate, { color: colors.textSecondary }]}>
-                  {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                </Text>
-                {todaySchedule.map(renderScheduleItem)}
-              </View>
-            </View>
-          )}
-
           {/* Favorites Section */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Favorites</Text>
@@ -943,10 +930,10 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   favoriteCard: {
-    width: 160,
-    height: 200,
-    marginRight: 12,
-    borderRadius: 12,
+    width: 200,
+    height: 250,
+    marginRight: 14,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -962,21 +949,21 @@ const styles = StyleSheet.create({
   favoriteOverlay: {
     flex: 1,
     justifyContent: "space-between",
-    padding: 10,
+    padding: 12,
   },
   favoriteHeart: {
     alignSelf: "flex-end",
     backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 15,
-    padding: 6,
+    borderRadius: 18,
+    padding: 8,
   },
   favoriteInfo: {
     backgroundColor: "rgba(0, 0, 0, 0.6)",
-    borderRadius: 8,
-    padding: 8,
+    borderRadius: 10,
+    padding: 10,
   },
   favoriteName: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
     color: "#FFF",
   },

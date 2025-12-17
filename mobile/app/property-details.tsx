@@ -132,7 +132,7 @@ export default function PropertyDetailsScreen() {
       
       setShowBookingModal(false);
       Alert.alert(
-        "Booking Confirmed! 🎉",
+        "Booking Confirmed!",
         `Your trip to ${destination.name} has been booked!\n\nCheck-in: ${formatDate(checkInDate)}\nCheck-out: ${formatDate(checkOutDate)}\nGuests: ${guests}\nTotal: ₱${totalPrice.toLocaleString()}`,
         [
           {

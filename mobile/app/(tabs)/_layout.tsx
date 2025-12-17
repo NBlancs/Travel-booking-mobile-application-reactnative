@@ -87,7 +87,7 @@ export default function TabsLayout() {
                 justifyContent: "center",
                 alignItems: "center",
               }}>
-                <Ionicons name="calendar-outline" color={focused ? "#FFFFFF" : color} size={24} />
+                <Ionicons name="airplane-outline" color={focused ? "#FFFFFF" : color} size={24} />
               </View>
             ),
         }} 

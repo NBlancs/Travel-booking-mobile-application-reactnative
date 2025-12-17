@@ -17,14 +17,28 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useBooking } from "../../context/BookingContext";
 import { categories, extendedCategories } from "../../constants/Categories";
 import { destinationsApi, authApi } from "../../lib/api";
 
 const { width } = Dimensions.get('window');
 
+// Available locations for dropdown
+const availableLocations = [
+  { id: 1, name: "All Locations", country: "" },
+  { id: 2, name: "Bali", country: "Indonesia" },
+  { id: 3, name: "Paris", country: "France" },
+  { id: 4, name: "Tokyo", country: "Japan" },
+  { id: 5, name: "New York", country: "USA" },
+  { id: 6, name: "London", country: "UK" },
+  { id: 7, name: "Dubai", country: "UAE" },
+  { id: 8, name: "Rome", country: "Italy" },
+];
+
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
   const { colors, isDark } = useTheme();
+  const { bookings } = useBooking();
   const [destinations, setDestinations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -32,6 +46,9 @@ export default function DashboardScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState(availableLocations[0]);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(1)).current;
   const heartTranslateY = useRef(new Animated.Value(0)).current;
@@ -55,19 +72,37 @@ export default function DashboardScreen() {
   const loadFavorites = async () => {
     try {
       const data = await authApi.getFavorites();
-      const favoriteIds = new Set(data.favorites.map((f: any) => f._id));
+      const favoriteIds = new Set<string>(data.favorites.map((f: any) => f._id));
       setFavorites(favoriteIds);
     } catch (error) {
       console.error("Failed to load favorites", error);
     }
   };
 
-  // Filter destinations based on search query
-  const filteredDestinations = destinations.filter((destination) => 
-    destination.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    destination.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    destination.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Count confirmed bookings for notification badge
+  const confirmedBookingsCount = bookings.filter(b => b.status === "confirmed").length;
+
+  // Filter destinations based on search query, category, and location
+  const filteredDestinations = destinations.filter((destination) => {
+    const matchesSearch = 
+      destination.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      destination.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      destination.location.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = !selectedCategory || 
+      destination.category?.toLowerCase() === selectedCategory.toLowerCase();
+    
+    const matchesLocation = !selectedLocation.country || 
+      destination.country?.toLowerCase().includes(selectedLocation.country.toLowerCase()) ||
+      destination.location?.toLowerCase().includes(selectedLocation.name.toLowerCase());
+    
+    return matchesSearch && matchesCategory && matchesLocation;
+  });
+
+  // Destinations filtered by category (for explore section)
+  const displayDestinations = selectedCategory || selectedLocation.country
+    ? filteredDestinations
+    : destinations;
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
@@ -170,18 +205,64 @@ export default function DashboardScreen() {
             <Pressable style={[styles.locationButton, { backgroundColor: colors.surface }]}>
               <Ionicons name="location-outline" size={24} color={colors.text} />
             </Pressable>
-            <View>
+            <Pressable onPress={() => setShowLocationDropdown(!showLocationDropdown)}>
               <Text style={[styles.locationLabel, { color: colors.textSecondary }]}>Location</Text>
               <View style={styles.locationRow}>
-                <Text style={[styles.locationText, { color: colors.text }]}>Bali, Indonesia</Text>
-                <Ionicons name="chevron-down" size={12} color={colors.textSecondary} />
+                <Text style={[styles.locationText, { color: colors.text }]}>
+                  {selectedLocation.country ? `${selectedLocation.name}, ${selectedLocation.country}` : selectedLocation.name}
+                </Text>
+                <Ionicons name={showLocationDropdown ? "chevron-up" : "chevron-down"} size={12} color={colors.textSecondary} />
               </View>
-            </View>
+            </Pressable>
           </View>
-          <Pressable style={[styles.notificationButton, { backgroundColor: colors.surface }]}>
+          <Pressable 
+            style={[styles.notificationButton, { backgroundColor: colors.surface }]}
+            onPress={() => router.push("/(tabs)/schedule")}
+          >
             <Ionicons name="notifications-outline" size={24} color={colors.text} />
+            {confirmedBookingsCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>
+                  {confirmedBookingsCount > 9 ? "9+" : confirmedBookingsCount}
+                </Text>
+              </View>
+            )}
           </Pressable>
         </View>
+
+        {/* Location Dropdown */}
+        {showLocationDropdown && (
+          <View style={[styles.locationDropdown, { backgroundColor: colors.surface }]}>
+            {availableLocations.map((location) => (
+              <Pressable
+                key={location.id}
+                style={[
+                  styles.locationDropdownItem,
+                  selectedLocation.id === location.id && { backgroundColor: isDark ? colors.background : "#F3F4F6" }
+                ]}
+                onPress={() => {
+                  setSelectedLocation(location);
+                  setShowLocationDropdown(false);
+                }}
+              >
+                <Ionicons 
+                  name={location.country ? "location" : "globe-outline"} 
+                  size={18} 
+                  color={selectedLocation.id === location.id ? colors.primary : colors.textSecondary} 
+                />
+                <Text style={[
+                  styles.locationDropdownText,
+                  { color: selectedLocation.id === location.id ? colors.primary : colors.text }
+                ]}>
+                  {location.country ? `${location.name}, ${location.country}` : location.name}
+                </Text>
+                {selectedLocation.id === location.id && (
+                  <Ionicons name="checkmark" size={18} color={colors.primary} />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        )}
 
         {/* Search Bar */}
         <View style={styles.searchWrapper}>
@@ -229,7 +310,14 @@ export default function DashboardScreen() {
 
         {/* Popular Place Category */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>    Popular Place Category</Text>
+          <View style={styles.categoryHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>    Popular Place Category</Text>
+            {selectedCategory && (
+              <Pressable onPress={() => setSelectedCategory(null)} style={styles.clearFilterButton}>
+                <Text style={[styles.clearFilterText, { color: colors.primary }]}>Clear Filter</Text>
+              </Pressable>
+            )}
+          </View>
           <View style={styles.categoriesContainer}>
             {categories.map((category) => (
               <Pressable 
@@ -237,20 +325,23 @@ export default function DashboardScreen() {
                 style={({ pressed }) => [
                   styles.categoryCard,
                   { backgroundColor: colors.surface },
+                  selectedCategory === category.name && { backgroundColor: colors.primary, borderColor: colors.primary },
                   pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] }
                 ]}
                 onPress={() => {
                   if (category.name === "More") {
                     setIsModalVisible(true);
                   } else {
-                    // Handle other category clicks
-                    console.log(`${category.name} category clicked`);
-                    // You can add navigation or filtering logic here
+                    // Toggle category filter
+                    setSelectedCategory(selectedCategory === category.name ? null : category.name);
                   }
                 }}
               >
                 <Text style={styles.categoryIcon}>{category.icon}</Text>
-                <Text style={[styles.categoryName, { color: colors.text }]}>{category.name}</Text>
+                <Text style={[
+                  styles.categoryName, 
+                  { color: selectedCategory === category.name ? "#FFFFFF" : colors.text }
+                ]}>{category.name}</Text>
               </Pressable>
             ))}
           </View>
@@ -259,7 +350,9 @@ export default function DashboardScreen() {
         {/* Explore the World */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Explore the World</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {selectedCategory ? `${selectedCategory} Destinations` : "Explore the World"}
+            </Text>
             <Pressable onPress={() => router.push("/(tabs)/booking")}>
               <Text style={[styles.seeAllText, { color: colors.textSecondary }]}>See all</Text>
             </Pressable>
@@ -273,8 +366,14 @@ export default function DashboardScreen() {
           >
             {loading ? (
               <ActivityIndicator size="large" color={colors.primary} style={{ marginLeft: 20 }} />
+            ) : displayDestinations.length === 0 ? (
+              <View style={styles.noResultsContainer}>
+                <Text style={[styles.noResultsText, { color: colors.textSecondary }]}>
+                  No destinations found for this filter
+                </Text>
+              </View>
             ) : (
-              destinations.map((destination) => (
+              displayDestinations.map((destination) => (
                 <Pressable 
                   key={destination._id} 
                   style={styles.propertyCard}
@@ -385,16 +484,19 @@ export default function DashboardScreen() {
                     style={({ pressed }) => [
                       styles.modalCategoryCard,
                       { backgroundColor: colors.surface, borderColor: colors.border },
+                      selectedCategory === category.name && { backgroundColor: colors.primary, borderColor: colors.primary },
                       pressed && { backgroundColor: isDark ? colors.background : "#F3F4F6", transform: [{ scale: 0.98 }] }
                     ]}
                     onPress={() => {
+                      setSelectedCategory(selectedCategory === category.name ? null : category.name);
                       setIsModalVisible(false);
-                      console.log(`${category.name} category selected`);
-                      // Add your category filter/navigation logic here
                     }}
                   >
                     <Text style={styles.modalCategoryIcon}>{category.icon}</Text>
-                    <Text style={[styles.modalCategoryName, { color: colors.text }]}>{category.name}</Text>
+                    <Text style={[
+                      styles.modalCategoryName, 
+                      { color: selectedCategory === category.name ? "#FFFFFF" : colors.text }
+                    ]}>{category.name}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -473,6 +575,53 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+    position: "relative",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#EF4444",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: "#FFF",
+  },
+  notificationBadgeText: {
+    color: "#FFF",
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  locationDropdown: {
+    position: "absolute",
+    top: 110,
+    left: 20,
+    right: 80,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+    zIndex: 1000,
+    overflow: "hidden",
+  },
+  locationDropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  locationDropdownText: {
+    fontSize: 15,
+    fontWeight: "500",
+    flex: 1,
   },
   searchWrapper: {
     marginHorizontal: 20,
@@ -547,6 +696,20 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 22,
+  },
+  categoryHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingRight: 20,
+  },
+  clearFilterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  clearFilterText: {
+    fontSize: 14,
+    fontWeight: "600",
   },
   sectionHeader: {
     flexDirection: "row",
