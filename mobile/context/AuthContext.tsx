@@ -31,10 +31,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
           
           // Then fetch fresh user data from server to get latest profileImage etc.
           try {
-            const freshUser = await userApi.getProfile();
-            if (freshUser) {
-              setUser(freshUser);
-              await tokenStorage.setUser(freshUser);
+            const response = await userApi.getProfile();
+            if (response.user) {
+              setUser(response.user);
+              await tokenStorage.setUser(response.user);
             }
           } catch (error) {
             console.log("Could not refresh user data:", error);
@@ -81,10 +81,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const refreshUser = useCallback(async () => {
     try {
-      const freshUser = await userApi.getProfile();
-      if (freshUser) {
-        setUser(freshUser);
-        await tokenStorage.setUser(freshUser);
+      const response = await userApi.getProfile();
+      if (response.user) {
+        setUser(response.user);
+        await tokenStorage.setUser(response.user);
       }
     } catch (error) {
       console.log("Could not refresh user:", error);

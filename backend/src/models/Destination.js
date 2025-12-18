@@ -20,7 +20,6 @@ const destinationSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Add virtual for priceFormatted if not stored
 destinationSchema.pre('save', function(next) {
   if (this.price && !this.priceFormatted) {
     this.priceFormatted = `₱${this.price.toLocaleString()}`;

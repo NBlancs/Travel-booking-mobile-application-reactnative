@@ -4,7 +4,7 @@ const memoryStorage: Record<string, string> = {};
 const simpleStorage = {
     getItem: (key: string): string | null => memoryStorage[key] || null,
     setItem: (key: string, value: string): void => { memoryStorage[key] = value; },
-    removeItem: (key: string): void => { delete memoryStorage[k]; },
+    removeItem: (key: string): void => { delete memoryStorage[key]; },
     multiRemove: (keys: string[]): void => { keys.forEach(k => delete memoryStorage[k]); },
 };
 
